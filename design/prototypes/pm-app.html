@@ -981,15 +981,15 @@ let splashT;
 SCREENS.splash = () => ({ sb: false, tab: null, html: DOIntro.splash(INTRO.role), after() {
   $('#statusbar').classList.add('light');
   clearTimeout(splashT);
-  splashT = setTimeout(() => { if (cur().name === 'splash') leaveSplash(); }, 2400);
+  splashT = setTimeout(() => { if (cur().name === 'splash') leaveSplash(); }, DOIntro.SPLASH_MS);
 } });
 SCREENS.onboarding = ({ i = 0 }) => ({ sb: false, tab: null, html: DOIntro.onboarding({ ...INTRO, i: +i }),
   after() { $('#statusbar').classList.add('light'); } });   // dark "Dusk" screen
 // Every launch: splash → 3 onboarding screens → login → home.
 function leaveSplash() {
   clearTimeout(splashT);
-  S.stack = [{ name: 'onboarding', params: { i: 0 } }];
-  render('fade');
+  // Let the splash dissolve first; skip the hand-over if the user already jumped elsewhere.
+  DOIntro.leave(view, () => { if (cur().name !== 'splash') return; S.stack = [{ name: 'onboarding', params: { i: 0 } }]; render('fade'); });
 }
 function obTo(i) {
   const at = +(cur().params.i || 0);
