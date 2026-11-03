@@ -3,101 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Digital Operation — Prototypes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,700..900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+<title>Digital Operation — Employee App</title>
 <!--
-  Digital Operation — prototype switcher. Hosts both apps side by side as tabs:
-  employee-app.html (unchanged) and pm-app.html. Each app keeps its own state while you switch.
-  Deep links: index.html#employee, index.html#pm.
+  Digital Operation — prototype host. Keeps both apps loaded (employee-app.html and pm-app.html)
+  and shows one at a time. The switcher itself sits above each phone (switcher.js) and asks this
+  page to swap apps, so each app keeps its own state. Deep links: index.html#employee, index.html#pm.
 -->
 <style>
-  :root{--primary:#F37F46;--surface-alt:#F2F2F7;--muted:#6C6C70;--stage:#F6F6F8;--bar:64px}
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
-  body{background:var(--stage);color:#000;font-family:"Nunito Sans","Cairo",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
-  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
-  button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-  iconify-icon{display:inline-block;width:1em;height:1em;flex:none}
-
-  .bar{position:relative;z-index:2;height:var(--bar);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:0 24px;
-    background:rgba(255,255,255,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(229,229,234,.8)}
-  .brand{display:flex;align-items:center;gap:10px;justify-self:start}
-  .brand-name{font-weight:900;font-size:16px;letter-spacing:-0.01em;direction:ltr}
-  .brand-name span{color:var(--primary)}
-  .meta{justify-self:end;font-size:12px;font-weight:700;color:var(--muted)}
-
-  .tabs{display:flex;gap:4px;padding:4px;background:var(--surface-alt);border-radius:9999px}
-  .tabs [role="tab"]{display:flex;align-items:center;gap:10px;height:44px;padding:0 18px 0 16px;border-radius:9999px;color:var(--muted);transition:background .2s,color .2s,box-shadow .2s}
-  .tabs [role="tab"]:hover{color:#000}
-  .tabs [role="tab"][aria-selected="true"]{background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-  .tabs iconify-icon{font-size:20px}
-  .tabs [aria-selected="true"] iconify-icon{color:var(--primary)}
-  .tl{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
-  .tl b{font-family:"Cairo",sans-serif;font-size:13px;font-weight:800}
-  .tl small{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.6;direction:ltr}
-
-  .frames{position:relative;height:calc(100% - var(--bar))}
-  .frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--stage)}
-  .frames iframe[hidden]{display:none}
-
-  @media (max-width:900px){ .meta{display:none} .bar{grid-template-columns:auto 1fr} .tabs{justify-self:end} }
-  @media (max-width:600px){
-    :root{--bar:60px}
-    .bar{grid-template-columns:1fr;padding:0 12px}
-    .brand{display:none}
-    .tabs{justify-self:stretch}
-    .tabs [role="tab"]{flex:1;justify-content:center;padding:0 10px;height:42px}
-    .tl small{display:none}
-  }
+  html,body{margin:0;height:100%;background:#F6F6F8}
+  body{overflow:hidden}
+  iframe{display:block;width:100%;height:100%;border:0;background:#F6F6F8}
+  iframe[hidden]{display:none}
 </style>
 </head>
 <body>
-<header class="bar">
-  <div class="brand">
-    <svg width="30" height="30" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="19"/><circle cx="19" cy="19" r="8" fill="none" stroke="#fff" stroke-width="2.4"/><circle cx="26.6" cy="11.4" r="3.6" fill="#F37F46"/></svg>
-    <span class="brand-name">Digital Operation<span>.</span></span>
-  </div>
-  <div class="tabs" role="tablist" aria-label="اختيار التطبيق">
-    <button role="tab" type="button" id="tab-employee" aria-controls="app-employee" data-app="employee">
-      <iconify-icon icon="solar:user-hand-up-bold" aria-hidden="true"></iconify-icon><span class="tl"><b>تطبيق الموظف</b><small>Employee App</small></span></button>
-    <button role="tab" type="button" id="tab-pm" aria-controls="app-pm" data-app="pm">
-      <iconify-icon icon="solar:case-round-bold" aria-hidden="true"></iconify-icon><span class="tl"><b>تطبيق مدير المشروع</b><small>Project Manager App</small></span></button>
-  </div>
-  <div class="meta">نموذج تفاعلي · Ember Pill</div>
-</header>
-
-<main class="frames">
-  <iframe id="app-employee" role="tabpanel" aria-labelledby="tab-employee" title="تطبيق الموظف" src="employee-app.html" hidden></iframe>
-  <iframe id="app-pm" role="tabpanel" aria-labelledby="tab-pm" title="تطبيق مدير المشروع" src="pm-app.html" hidden></iframe>
-</main>
-
+<iframe id="app-employee" title="تطبيق الموظف" src="employee-app.html" hidden></iframe>
+<iframe id="app-pm" title="تطبيق مدير المشروع" src="pm-app.html" hidden></iframe>
 <script>
-  // Both apps stay loaded, so each keeps its own screen and state while you switch between them.
-  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  const FRAMES = { employee: document.getElementById('app-employee'), pm: document.getElementById('app-pm') };
   function show(app, focus) {
-    if (!tabs.some(t => t.dataset.app === app)) app = 'employee';
-    tabs.forEach(t => {
-      const on = t.dataset.app === app;
-      t.setAttribute('aria-selected', on);
-      t.tabIndex = on ? 0 : -1;
-      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
-      if (on && focus) t.focus();
-    });
+    if (!(app in FRAMES)) app = 'employee';
+    Object.entries(FRAMES).forEach(([k, f]) => { f.hidden = k !== app; });
     if (location.hash !== '#' + app) history.replaceState(null, '', '#' + app);
     document.title = `Digital Operation — ${app === 'pm' ? 'Project Manager App' : 'Employee App'}`;
+    if (focus) { FRAMES[app].focus(); FRAMES[app].contentWindow.postMessage({ type: 'do:focus-switch' }, '*'); }
   }
-  tabs.forEach((t, i) => {
-    t.addEventListener('click', () => show(t.dataset.app));
-    t.addEventListener('keydown', e => {
-      // RTL: the right arrow moves to the previous tab.
-      const step = { ArrowLeft: 1, ArrowRight: -1, Home: -99, End: 99 }[e.key];
-      if (step == null) return;
-      e.preventDefault();
-      show(tabs[Math.max(0, Math.min(tabs.length - 1, i + step))].dataset.app, true);
-    });
+  // Only the two hosted apps may ask to switch.
+  addEventListener('message', e => {
+    const fromApp = Object.values(FRAMES).some(f => f.contentWindow === e.source);
+    if (fromApp && e.data && e.data.type === 'do:switch-app') show(e.data.app, true);
   });
   addEventListener('hashchange', () => show(location.hash.slice(1)));
   show(location.hash.slice(1));
