@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Operation — Intro Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,400..900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+<!--
+  Three Splash + Onboarding design directions for comparison only. Nothing here is applied to
+  employee-app.html or pm-app.html until one direction is chosen.
+  Illustrations generated with Magnific (assets/concepts): 3 per direction, one shared style each.
+-->
+<style>
+  :root{--primary:#F37F46;--surface-alt:#F2F2F7;--muted:#6C6C70;--stage:#F6F6F8;--r-full:9999px;--s:.66}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--stage);color:#000;font-family:"Nunito Sans","Cairo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+  button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+  iconify-icon{display:inline-block;width:1em;height:1em;flex:none}
+  .latin{font-family:"Nunito Sans",sans-serif;direction:ltr;unicode-bidi:isolate}
+
+  /* Page */
+  .page{max-width:1240px;margin:0 auto;padding:48px 24px 96px}
+  .kick{font-family:"Nunito Sans";font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);direction:ltr;text-align:right}
+  h1{margin:8px 0 8px;font-size:32px;font-weight:900;line-height:1.25}
+  .lead{margin:0;max-width:720px;font-size:14px;font-weight:600;line-height:24px;color:var(--muted)}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:28px 0 8px;position:sticky;top:0;z-index:5;padding:12px 0;background:linear-gradient(var(--stage) 80%,transparent)}
+  .seg{display:flex;gap:4px;padding:4px;border-radius:var(--r-full);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .seg button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:var(--r-full);font-size:13px;font-weight:800;color:var(--muted)}
+  .seg button[aria-pressed="true"]{background:var(--surface-alt);color:#000}
+  .seg button[aria-pressed="true"] iconify-icon{color:var(--primary)}
+  .jump{display:flex;gap:6px}
+  .jump a{display:flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:var(--r-full);background:#fff;font-size:12px;font-weight:800;color:#000;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .jump b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#000;color:#fff;font-family:"Nunito Sans";font-size:11px}
+  .note{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px;font-weight:700;color:var(--muted)}
+  .note iconify-icon{font-size:16px;color:var(--primary)}
+
+  .concept{margin-top:56px;scroll-margin-top:80px}
+  .c-head{display:grid;grid-template-columns:1fr minmax(260px,420px);gap:24px;align-items:end}
+  .c-badge{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#000;color:#fff;font-family:"Nunito Sans";font-weight:900;font-size:16px;margin-bottom:10px}
+  .c-head h2{margin:0;font-size:24px;font-weight:900;line-height:34px}
+  .c-head h2 small{font-family:"Nunito Sans";font-size:13px;font-weight:800;color:var(--muted);margin-right:10px;direction:ltr;unicode-bidi:isolate}
+  .c-head p{margin:6px 0 0;font-size:14px;font-weight:600;line-height:23px;color:var(--muted)}
+  .traits{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;padding:16px 18px;border-radius:24px;background:#fff;font-size:12px;line-height:18px}
+  .traits dt{font-weight:800;color:var(--muted)}
+  .traits dd{margin:0;font-weight:700}
+  .row{display:flex;gap:26px;overflow-x:auto;padding:24px 6px 10px;scrollbar-width:thin}
+  figure{margin:0;flex:none;display:flex;flex-direction:column;align-items:center;gap:14px}
+  figcaption{font-size:12px;font-weight:800;color:var(--muted)}
+
+  /* Phone mockup (390×844 scaled) */
+  .ph-wrap{width:calc(390px * var(--s) + 14px);height:calc(844px * var(--s) + 14px);padding:7px}
+  .ph{position:relative;width:390px;height:844px;border-radius:56px;overflow:hidden;isolation:isolate;transform:scale(var(--s));transform-origin:top right;
+    box-shadow:0 0 0 10px #0B0B0C,0 0 0 11px #2C2C2E,0 40px 70px -30px rgba(0,0,0,.35)}
+  .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:var(--r-full);background:#000;z-index:20}
+  .sb{position:absolute;top:0;left:0;right:0;height:54px;padding:0 30px 0 36px;display:flex;justify-content:space-between;align-items:center;z-index:19;font-family:"Nunito Sans";font-weight:800;font-size:16px;direction:ltr}
+  .sb svg{fill:currentColor}
+  .sb i{display:flex;gap:6px;align-items:center;font-style:normal}
+  .hi{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:var(--r-full);background:currentColor;z-index:20;opacity:.9}
+  .scr{position:absolute;inset:0}
+  .contours path{fill:none}
+
+  /* ── A · Blueprint ── */
+  .A{background:#F9F8F4;color:#111;
+    background-image:linear-gradient(rgba(0,0,0,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.035) 1px,transparent 1px);background-size:22px 22px}
+  .A .contours path{stroke:rgba(243,127,70,.35);stroke-width:1}
+  .A .contours path.idx{stroke:rgba(243,127,70,.6);stroke-width:1.4}
+  .A-splash{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-bottom:30px}
+  .A-mark{position:relative;padding:14px;border:1px dashed rgba(0,0,0,.25);border-radius:50%;margin-bottom:22px}
+  .A-mark::before,.A-mark::after{content:"";position:absolute;background:rgba(0,0,0,.25)}
+  .A-mark::before{left:-26px;right:-26px;top:50%;height:1px}
+  .A-mark::after{top:-26px;bottom:-26px;left:50%;width:1px}
+  .A-mark svg{position:relative;z-index:1;display:block}
+  .A-name{font-family:"Nunito Sans";font-size:30px;font-weight:900;letter-spacing:-.02em;direction:ltr}
+  .A-sub{font-size:14px;font-weight:700;color:#6C6C70}
+  .A-role{margin-top:16px;padding:6px 14px;border:1px solid rgba(0,0,0,.18);border-radius:var(--r-full);font-size:12px;font-weight:800;background:#F9F8F4}
+  .A-ruler{position:absolute;left:48px;right:48px;bottom:70px;height:22px;border-top:1px solid #111}
+  .A-ruler i{position:absolute;top:0;width:1px;height:8px;background:#111}
+  .A-ruler b{position:absolute;top:-2px;right:0;height:3px;width:62%;background:var(--primary)}
+  .A-coord{position:absolute;left:0;right:0;bottom:40px;text-align:center;font-family:"Nunito Sans";font-size:10px;font-weight:800;letter-spacing:.14em;color:#6C6C70;direction:ltr}
+  .A-ob{position:absolute;inset:0;display:flex;flex-direction:column;padding:62px 24px 34px}
+  .A-top{display:flex;justify-content:space-between;align-items:center;height:36px;font-family:"Nunito Sans";font-size:13px;font-weight:900}
+  .A-top .cnt{direction:ltr;letter-spacing:.06em}
+  .A-top .cnt span{color:var(--primary)}
+  .A-skip{font-family:"Cairo";font-size:12px;font-weight:800;color:#6C6C70;text-decoration:underline;text-underline-offset:4px}
+  .A-art{position:relative;margin:14px -6px 0;aspect-ratio:1;background:center/cover no-repeat}
+  .A-art::before,.A-art::after{content:"";position:absolute;width:22px;height:22px;border:2px solid #111}
+  .A-art::before{top:0;right:0;border-width:2px 2px 0 0}
+  .A-art::after{bottom:0;left:0;border-width:0 0 2px 2px}
+  .A-tag{display:inline-block;margin-top:18px;font-size:12px;font-weight:800;color:#C4541F}
+  .A-title{margin:6px 0 8px;font-size:24px;font-weight:900;line-height:34px}
+  .A-copy{margin:0;font-size:14px;font-weight:600;line-height:23px;color:#5B5B60}
+  .A-foot{margin-top:auto;display:flex;align-items:center;gap:14px}
+  .A-prog{flex:1;display:flex;gap:6px}
+  .A-prog i{flex:1;height:3px;background:rgba(0,0,0,.12)}
+  .A-prog i.on{background:#111}
+  .A-next{display:flex;align-items:center;gap:8px;height:52px;padding:0 22px;border-radius:var(--r-full);background:var(--primary);color:#fff;font-size:14px;font-weight:900;box-shadow:0 12px 26px -10px rgba(243,127,70,.6)}
+  .A-hint{margin:10px 0 0;font-size:11px;font-weight:700;color:#6C6C70;text-align:center}
+
+  /* ── B · Dusk ── */
+  .B{background:#17161B;color:#fff}
+  .B .contours path{stroke:rgba(243,127,70,.10);stroke-width:1.2}
+  .B .contours path.idx{stroke:rgba(243,127,70,.18);stroke-width:1.8}
+  .B-glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 44%,rgba(243,127,70,.42),rgba(243,127,70,0) 46%)}
+  .B-splash{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-bottom:30px}
+  .B-mark{border-radius:50%;margin-bottom:24px;box-shadow:0 0 0 10px rgba(243,127,70,.12),0 0 60px 6px rgba(243,127,70,.55)}
+  .B-mark svg{display:block}
+  .B-name{font-family:"Nunito Sans";font-size:30px;font-weight:900;letter-spacing:-.02em;direction:ltr}
+  .B-sub{font-size:14px;font-weight:700;color:rgba(255,255,255,.7)}
+  .B-role{margin-top:16px;padding:7px 14px;border-radius:var(--r-full);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:12px;font-weight:800}
+  .B-load{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);display:flex;gap:6px}
+  .B-load i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25)}
+  .B-load i:first-child{background:var(--primary);box-shadow:0 0 12px rgba(243,127,70,.9)}
+  .B-art{position:absolute;left:0;right:0;top:0;height:560px;background:center 20%/cover no-repeat}
+  .B-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,22,27,.55) 0%,rgba(23,22,27,0) 18%,rgba(23,22,27,0) 58%,#17161B 100%)}
+  .B-top{position:absolute;top:62px;left:24px;right:24px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+  .B-brand{display:flex;align-items:center;gap:8px;font-family:"Nunito Sans";font-size:14px;font-weight:900;direction:ltr}
+  .B-skip{height:34px;padding:0 14px;border-radius:var(--r-full);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);font-size:12px;font-weight:800}
+  .B-body{position:absolute;left:0;right:0;bottom:0;padding:0 24px 36px}
+  .B-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--r-full);background:rgba(243,127,70,.16);color:#FFB089;font-size:12px;font-weight:800}
+  .B-title{margin:14px 0 8px;font-size:26px;font-weight:900;line-height:36px}
+  .B-copy{margin:0;font-size:14px;font-weight:600;line-height:23px;color:rgba(255,255,255,.66)}
+  .B-dots{display:flex;gap:6px;margin:26px 0 18px}
+  .B-dots i{width:8px;height:8px;border-radius:var(--r-full);background:rgba(255,255,255,.2)}
+  .B-dots i.on{width:28px;background:var(--primary);box-shadow:0 0 12px rgba(243,127,70,.8)}
+  .B-next{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:56px;border-radius:var(--r-full);background:var(--primary);color:#fff;font-size:15px;font-weight:900;box-shadow:0 14px 34px -10px rgba(243,127,70,.8)}
+  .B-hint{margin:10px 0 0;font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-align:center}
+
+  /* ── C · Desert layers ── */
+  .C{background:#F6EEDC;color:#3B1F10}
+  .C-splash{position:absolute;inset:0;background:var(--primary);color:#fff}
+  .C-dunes{position:absolute;left:0;right:0;bottom:0;width:100%;height:420px}
+  .C-mid{position:absolute;left:0;right:0;top:230px;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .C-mark{margin-bottom:22px;filter:drop-shadow(0 14px 22px rgba(120,40,0,.35))}
+  .C-name{font-family:"Nunito Sans";font-size:30px;font-weight:900;letter-spacing:-.02em;direction:ltr}
+  .C-sub{font-size:14px;font-weight:700;opacity:.9}
+  .C-role{margin-top:16px;padding:7px 14px;border-radius:var(--r-full);background:#FFF6EA;color:#C4541F;font-size:12px;font-weight:900;box-shadow:0 8px 16px -8px rgba(120,40,0,.4)}
+  .C-art{position:absolute;inset:0;background:center bottom/cover no-repeat}
+  .C-text{position:absolute;top:104px;left:24px;right:24px}
+  .C-step{font-family:"Nunito Sans";font-size:13px;font-weight:900;color:#C4541F;direction:ltr;text-align:right}
+  .C-title{margin:8px 0 10px;font-size:28px;font-weight:900;line-height:40px}
+  .C-copy{margin:0;font-size:14px;font-weight:700;line-height:23px;color:rgba(59,31,16,.72)}
+  .C-top{position:absolute;top:58px;left:24px;right:24px;display:flex;justify-content:space-between;align-items:center}
+  .C-brand{display:flex;align-items:center;gap:8px;font-family:"Nunito Sans";font-size:14px;font-weight:900;direction:ltr}
+  .C-skip{font-size:12px;font-weight:900;color:#C4541F}
+  .C-bar{position:absolute;left:16px;right:16px;bottom:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 12px 12px 18px;border-radius:var(--r-full);
+    background:rgba(255,248,238,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 30px -12px rgba(120,40,0,.35)}
+  .C-dots{display:flex;gap:6px;padding-inline-start:8px}
+  .C-dots i{width:8px;height:8px;border-radius:var(--r-full);background:rgba(196,84,31,.25)}
+  .C-dots i.on{width:26px;background:#C4541F}
+  .C-next{display:flex;align-items:center;gap:8px;height:52px;padding:0 20px;border-radius:var(--r-full);background:var(--primary);color:#fff;font-size:14px;font-weight:900}
+  .C-next.round{width:52px;padding:0;justify-content:center}
+  .C-next iconify-icon{font-size:22px}
+
+  /* Comparison */
+  .cmp{margin-top:64px;padding:24px;border-radius:28px;background:#fff}
+  .cmp h2{margin:0 0 14px;font-size:20px;font-weight:900}
+  .cmp table{width:100%;border-collapse:collapse;font-size:13px}
+  .cmp th,.cmp td{padding:12px 10px;text-align:start;border-bottom:1px solid #EFEFF3;vertical-align:top;line-height:20px}
+  .cmp th{font-size:12px;font-weight:800;color:var(--muted)}
+  .cmp td:first-child{font-weight:800;color:var(--muted);white-space:nowrap}
+  @media (max-width:900px){ .c-head{grid-template-columns:1fr} h1{font-size:26px} }
+  @media (max-width:600px){ :root{--s:.56} .page{padding:32px 16px 72px} .controls{position:static} .cmp{padding:16px;overflow-x:auto} }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="kick">Digital Operation · Splash &amp; Onboarding · Concepts</div>
+  <h1>ثلاثة اتجاهات تصميمية لشاشة البداية والتعريف</h1>
+  <p class="lead">كل اتجاه بأسلوب بصري مختلف ورسومات خاصة به مولّدة بـ Magnific، مع الحفاظ على هوية Digital Operation: البرتقالي، الخطوط الكنتورية، الشعار، والخطوط. بدّل بين التطبيقين لمقارنة النصوص الخاصة بكل دور.</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="التطبيق">
+      <button type="button" data-app="employee" aria-pressed="true"><iconify-icon icon="solar:user-hand-up-bold"></iconify-icon>تطبيق الموظف</button>
+      <button type="button" data-app="pm" aria-pressed="false"><iconify-icon icon="solar:case-round-bold"></iconify-icon>تطبيق مدير المشروع</button>
+    </div>
+    <nav class="jump" aria-label="الاتجاهات"><a href="#A"><b>A</b>مخطط هندسي</a><a href="#B"><b>B</b>غسق</a><a href="#C"><b>C</b>طبقات الصحراء</a></nav>
+  </div>
+  <div class="note"><iconify-icon icon="solar:info-circle-bold"></iconify-icon>للمقارنة فقط — لم يُطبَّق أي اتجاه على التطبيقين بعد. التصميم الحالي يبقى كما هو حتى تختار.</div>
+  <div id="concepts"></div>
+  <section class="cmp" aria-label="مقارنة سريعة">
+    <h2>مقارنة سريعة</h2>
+    <table>
+      <thead><tr><th></th><th>A · مخطط هندسي</th><th>B · غسق</th><th>C · طبقات الصحراء</th></tr></thead>
+      <tbody>
+        <tr><td>الطابع</td><td>هندسي دقيق وهادئ، كأنه لوح رسم فني</td><td>فاخر وسينمائي بإضاءة دافئة</td><td>دافئ وحرفي، قريب من الهوية المحلية</td></tr>
+        <tr><td>الخلفية</td><td>ورق فاتح بشبكة خفيفة</td><td>داكنة بتوهج برتقالي</td><td>كريمي ورملي مع البرتقالي</td></tr>
+        <tr><td>الوضوح في الموقع</td><td>عالٍ جدًا تحت الشمس</td><td>أقل وضوحًا في الإضاءة القوية</td><td>عالٍ، والنص فوق مساحة سماء فارغة</td></tr>
+        <tr><td>الانسجام مع التطبيق</td><td>قريب من الواجهات الفاتحة الحالية</td><td>يختلف عن واجهة التطبيق الفاتحة</td><td>قريب من الألوان مع لمسة أكثر دفئًا</td></tr>
+        <tr><td>حجم الرسومات</td><td>≈ 180 KB لكل رسمة</td><td>≈ 100 KB لكل رسمة</td><td>≈ 80 KB لكل رسمة</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+  /* Role wording (same content as the live apps' onboarding) */
+  const ROLES = {
+    employee: { role: 'واجهة الموظف', tag: 'للفريق الميداني', icon: 'solar:user-hand-up-bold', steps: [
+      ['مشاريعك المسندة في مكان واحد', 'تابع حالة كل مشروع وموقعه على الخريطة، واحصل على الاتجاهات إلى الموقع بلمسة واحدة.'],
+      ['سجّل إنجاز يومك من الموقع', 'أضف تحديثًا يوميًا بوصف العمل المنجز، وأرفق الصور والفيديو والملفات الهندسية مباشرة من الموقع.'],
+      ['ابقَ على اطلاع دائمًا', 'تصلك الإشعارات عند إسنادك إلى مشروع أو تعليقه أو استئنافه، وتجد تحديثاتك مرتبة في التقويم.'] ] },
+    pm: { role: 'واجهة مدير المشروع', tag: 'لمدير المشروع', icon: 'solar:case-round-bold', steps: [
+      ['كل مشاريعك تحت إشرافك', 'اطّلع على المشاريع المسندة إليك وحالاتها ومواقعها على الخريطة في مكان واحد.'],
+      ['تحديثات الفرق الميدانية أولًا بأول', 'شاهد التحديثات اليومية فور إضافتها مع الصور والملفات، للاطلاع والتنزيل دون أي تعديل.'],
+      ['تقارير وسجل نشاط واضح', 'تابع أيام العمل ونشاط الفريق بالأرقام، وتصلك الإشعارات عند تغيّر الحالة أو اقتراب تاريخ النهاية.'] ] },
+  };
+  const IMG = (c, n) => `assets/concepts/${c}-${n}.jpg`;
+  const ICON = (i, c = '') => `<iconify-icon icon="${i}"${c ? ` style="color:${c}"` : ''}></iconify-icon>`;
+  const mark = (size, fill, ring, dot) => `<svg width="${size}" height="${size}" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="19" fill="${fill}"/><circle cx="19" cy="19" r="8" fill="none" stroke="${ring}" stroke-width="2.4"/><circle cx="26.6" cy="11.4" r="3.6" fill="${dot}"/></svg>`;
+  const statusbar = color => `<div class="sb" style="color:${color}"><span>9:41</span><i>
+    <svg width="18" height="12" viewBox="0 0 18 12"><rect y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" width="3" height="12" rx="1"/></svg>
+    <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/></svg></i></div>`;
+  const phone = (cls, sbColor, inner, label) => `<figure><div class="ph-wrap"><div class="ph ${cls}" style="color:${sbColor}"><div class="island"></div>${statusbar(sbColor)}<div class="scr">${inner}</div><div class="hi"></div></div></div><figcaption>${label}</figcaption></figure>`;
+  const contours = (o) => `<svg class="contours" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true"><g data-contours='${JSON.stringify(o)}'></g></svg>`;
+  const LABELS = ['شاشة البداية', 'التعريف · 1', 'التعريف · 2', 'التعريف · 3 ← تسجيل الدخول'];
+
+  /* A · Blueprint */
+  function conceptA(r) {
+    const splash = `${contours({ cx: 195, cy: 380, n: 9, r0: 70, gap: 34, amp: 0.12, seed: 2.2, dx: 0, dy: 0 })}
+      <div class="A-splash"><div class="A-mark">${mark(88, '#111', '#fff', '#F37F46')}</div>
+        <div class="A-name">Digital Operation</div><div class="A-sub">التشغيل الرقمي</div><span class="A-role">${r.role}</span></div>
+      <div class="A-ruler">${Array.from({ length: 15 }, (_, k) => `<i style="right:${k * 100 / 14}%"></i>`).join('')}<b></b></div>
+      <div class="A-coord">N 24.6312° · E 46.7133°</div>`;
+    const ob = i => {
+      const [t, c] = r.steps[i], last = i === 2;
+      return `<div class="A-ob"><div class="A-top"><span class="cnt"><span>0${i + 1}</span> / 03</span>${last ? '' : '<button class="A-skip" type="button">تخطي</button>'}</div>
+        <div class="A-art" style="background-image:url('${IMG('blueprint', i + 1)}')"></div>
+        <span class="A-tag">${r.tag}</span><h3 class="A-title">${t}</h3><p class="A-copy">${c}</p>
+        <div class="A-foot"><div class="A-prog">${[0, 1, 2].map(k => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}</div>
+          <button class="A-next" type="button">${last ? 'ابدأ الآن' + ICON('solar:login-2-bold') : 'التالي' + ICON('solar:arrow-left-linear')}</button></div>
+        ${last ? '<p class="A-hint">ستنتقل الآن إلى تسجيل الدخول</p>' : ''}</div>`;
+    };
+    return [phone('A', '#111', splash, LABELS[0]), ...[0, 1, 2].map(i => phone('A', '#111', ob(i), LABELS[i + 1]))].join('');
+  }
+
+  /* B · Dusk */
+  function conceptB(r) {
+    const splash = `<div class="B-glow"></div>${contours({ cx: 195, cy: 372, n: 18, r0: 56, gap: 24, amp: 0.13, seed: 1.1, dx: 0.6, dy: 1.2 })}
+      <div class="B-splash"><div class="B-mark">${mark(100, '#fff', '#F37F46', '#17161B')}</div>
+        <div class="B-name">Digital Operation</div><div class="B-sub">التشغيل الرقمي</div><span class="B-role">${r.role}</span></div>
+      <div class="B-load"><i></i><i></i><i></i></div>`;
+    const ob = i => {
+      const [t, c] = r.steps[i], last = i === 2;
+      return `<div class="B-art" style="background-image:url('${IMG('dusk', i + 1)}')"></div>
+        <div class="B-top"><span class="B-brand">${mark(26, '#fff', '#F37F46', '#17161B')}Digital Operation</span>${last ? '' : '<button class="B-skip" type="button">تخطي</button>'}</div>
+        <div class="B-body"><span class="B-tag">${ICON(r.icon)}${r.tag}</span><h3 class="B-title">${t}</h3><p class="B-copy">${c}</p>
+          <div class="B-dots">${[0, 1, 2].map(k => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
+          <button class="B-next" type="button">${last ? 'ابدأ الآن' + ICON('solar:login-2-bold') : 'التالي' + ICON('solar:alt-arrow-left-bold')}</button>
+          ${last ? '<p class="B-hint">ستنتقل الآن إلى تسجيل الدخول</p>' : ''}</div>`;
+    };
+    return [phone('B', '#fff', splash, LABELS[0]), ...[0, 1, 2].map(i => phone('B', '#fff', ob(i), LABELS[i + 1]))].join('');
+  }
+
+  /* C · Desert layers */
+  const dunes = `<svg class="C-dunes" viewBox="0 0 390 420" preserveAspectRatio="none" aria-hidden="true">
+    <defs><filter id="cut" x="-10%" y="-20%" width="120%" height="140%"><feDropShadow dx="0" dy="-4" stdDeviation="6" flood-color="#7A2E0E" flood-opacity=".28"/></filter></defs>
+    <path filter="url(#cut)" fill="#F59A63" d="M0 120 C 70 70, 140 90, 210 120 S 330 150, 390 100 L390 420 L0 420Z"/>
+    <path filter="url(#cut)" fill="#E8B585" d="M0 190 C 80 150, 160 180, 230 200 S 340 210, 390 170 L390 420 L0 420Z"/>
+    <path filter="url(#cut)" fill="#D46E3E" d="M0 260 C 60 240, 140 230, 220 260 S 330 300, 390 250 L390 420 L0 420Z"/>
+    <path filter="url(#cut)" fill="#F6E2C6" d="M0 330 C 90 300, 170 320, 250 330 S 350 340, 390 320 L390 420 L0 420Z"/></svg>`;
+  function conceptC(r) {
+    const splash = `<div class="C-splash">${dunes}<div class="C-mid"><div class="C-mark">${mark(100, '#fff', '#F37F46', '#3B1F10')}</div>
+      <div class="C-name">Digital Operation</div><div class="C-sub">التشغيل الرقمي</div><span class="C-role">${r.role}</span></div></div>`;
+    const ob = i => {
+      const [t, c] = r.steps[i], last = i === 2;
+      return `<div class="C-art" style="background-image:url('${IMG('paper', i + 1)}')"></div>
+        <div class="C-top"><span class="C-brand">${mark(26, '#3B1F10', '#fff', '#F37F46')}Digital Operation</span>${last ? '' : '<button class="C-skip" type="button">تخطي</button>'}</div>
+        <div class="C-text"><div class="C-step">0${i + 1} — ${r.tag}</div><h3 class="C-title">${t}</h3><p class="C-copy">${c}</p></div>
+        <div class="C-bar"><div class="C-dots">${[0, 1, 2].map(k => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
+          ${last ? `<button class="C-next" type="button">ابدأ الآن — تسجيل الدخول${ICON('solar:login-2-bold')}</button>` : `<button class="C-next round" type="button" aria-label="التالي">${ICON('solar:arrow-left-linear')}</button>`}</div>`;
+    };
+    return [phone('C', '#fff', splash, LABELS[0]), ...[0, 1, 2].map(i => phone('C', '#3B1F10', ob(i), LABELS[i + 1]))].join('');
+  }
+
+  const CONCEPTS = [
+    { id: 'A', name: 'مخطط هندسي', en: 'Blueprint', build: conceptA, desc: 'رسومات خطية تقنية بأسلوب المخططات الهندسية على ورق فاتح بشبكة دقيقة، مع لمسات برتقالية. هادئ ودقيق ويعبّر عن طبيعة العمل الهندسي.',
+      traits: [['الرسومات', 'خطوط حبر رفيعة متساوية الأبعاد مع خطوط قياس'], ['الخلفية', 'ورق #F9F8F4 بشبكة 22px'], ['الطباعة', 'أرقام خطوات «01 / 03» بخط Nunito'], ['التقدّم', 'شريط من ثلاثة مقاطع وزر برتقالي']] },
+    { id: 'B', name: 'غسق', en: 'Dusk', build: conceptB, desc: 'نماذج مصغّرة ثلاثية الأبعاد لمواقع العمل وقت الغسق على خلفية داكنة، مع توهج برتقالي وزجاج شفاف. فاخر وسينمائي.',
+      traits: [['الرسومات', 'نماذج مصغّرة لامعة بإضاءة دافئة'], ['الخلفية', 'فحمي #17161B بتوهج برتقالي'], ['الطباعة', 'عنوان أكبر 26px بالأبيض'], ['التقدّم', 'نقاط متوهجة وزر بعرض الشاشة']] },
+    { id: 'C', name: 'طبقات الصحراء', en: 'Desert layers', build: conceptC, desc: 'رسومات ورقية مقصوصة بطبقات كثبان رملية تشبه الخطوط الكنتورية، مع برج طيني ورافعة. دافئ وحرفي وقريب من الهوية المحلية.',
+      traits: [['الرسومات', 'طبقات ورق مقصوص بظلال ناعمة'], ['الخلفية', 'الرسمة بملء الشاشة، والنص فوق السماء'], ['الطباعة', 'عنوان كبير 28px في أعلى الشاشة'], ['التقدّم', 'شريط عائم بنقاط وزر دائري']] },
+  ];
+
+  /* Contours (same generator as the apps) */
+  function contourPath(cx, cy, r, seed, amp, pts = 56) {
+    const P = [];
+    for (let i = 0; i < pts; i++) { const t = i / pts * Math.PI * 2, k = 1 + amp * (0.55 * Math.sin(3 * t + seed) + 0.3 * Math.sin(5 * t + seed * 1.7) + 0.4 * Math.sin(2 * t - seed * 0.6)); P.push([cx + Math.cos(t) * r * k, cy + Math.sin(t) * r * k * 0.82]); }
+    const f = v => v.toFixed(1); let d = `M${f(P[0][0])},${f(P[0][1])}`;
+    for (let i = 0; i < pts; i++) { const p0 = P[(i - 1 + pts) % pts], p1 = P[i], p2 = P[(i + 1) % pts], p3 = P[(i + 2) % pts];
+      d += `C${f(p1[0] + (p2[0] - p0[0]) / 6)},${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)},${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])},${f(p2[1])}`; }
+    return d + 'Z';
+  }
+  function decorate() {
+    document.querySelectorAll('[data-contours]:empty').forEach(g => {
+      const o = JSON.parse(g.dataset.contours); let h = '';
+      for (let k = 0; k < o.n; k++) h += `<path class="${k % 4 === 3 ? 'idx' : ''}" d="${contourPath(o.cx + k * (o.dx || 0), o.cy + k * (o.dy || 0), o.r0 + k * o.gap, o.seed + k * 0.22, o.amp * (0.3 + 0.7 * k / o.n))}"/>`;
+      g.innerHTML = h;
+    });
+  }
+
+  function draw(app) {
+    const r = ROLES[app];
+    document.getElementById('concepts').innerHTML = CONCEPTS.map(c => `<section class="concept" id="${c.id}" aria-labelledby="h-${c.id}">
+      <div class="c-head"><div><span class="c-badge">${c.id}</span><h2 id="h-${c.id}">${c.name}<small>${c.en}</small></h2><p>${c.desc}</p></div>
+        <dl class="traits">${c.traits.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></div>
+      <div class="row">${c.build(r)}</div></section>`).join('');
+    decorate();
+    document.querySelectorAll('[data-app]').forEach(b => b.setAttribute('aria-pressed', b.dataset.app === app));
+  }
+  document.querySelector('.seg').addEventListener('click', e => { const b = e.target.closest('[data-app]'); if (b) draw(b.dataset.app); });
+  draw('employee');
+</script>
+</body>
+</html>

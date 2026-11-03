@@ -74,7 +74,6 @@
   .switch input::after{content:"";position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:right .2s}
   .switch input:checked{background:var(--primary)}
   .switch input:checked::after{right:18px}
-  .legend-row{display:flex;gap:6px;flex-wrap:wrap}
 
   /* ───────── Device ───────── */
   .phone{position:relative;width:390px;height:844px;border-radius:56px;background:var(--surface);overflow:hidden;isolation:isolate;flex:none;
@@ -168,6 +167,19 @@
   .seg.fill button{flex:1}
   .seg button[aria-pressed="true"]{background:#fff;color:#000;font-weight:800;box-shadow:0 1px 2px rgba(0,0,0,.06)}
   .seg .c{font-family:"Nunito Sans";font-size:11px;font-weight:900;opacity:.55}
+  /* Home status filter: separate chips in a sideways scroller that runs to the screen edges, so the next chip peeks in. */
+  .chips{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:var(--gutter);scrollbar-width:none;
+    margin:0 calc(var(--gutter) * -1) 10px;padding:4px var(--gutter) 8px;cursor:grab;
+    -webkit-mask-image:linear-gradient(to left,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%);mask-image:linear-gradient(to left,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%)}
+  .chips::-webkit-scrollbar{display:none}
+  .chips.dragging{cursor:grabbing;scroll-snap-type:none}
+  .chip{flex:none;scroll-snap-align:start;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:var(--r-full);background:var(--surface-alt);color:#3A3A3C;font-size:12px;font-weight:800;white-space:nowrap;transition:background .2s,color .2s,box-shadow .2s,transform .15s}
+  .chip:active{transform:scale(.96)}
+  .chip i{width:8px;height:8px;border-radius:50%;flex:none}
+  .chip .c{font-family:"Nunito Sans";font-size:11px;font-weight:900;opacity:.5}
+  .chip[aria-pressed="true"]{background:var(--primary);color:#fff;box-shadow:0 8px 18px -10px rgba(243,127,70,.85)}
+  .chip[aria-pressed="true"] i{background:#fff!important}
+  .chip[aria-pressed="true"] .c{opacity:.85}
   .pip{display:inline-flex;align-items:center;flex:none;gap:6px;height:24px;padding:0 10px;border-radius:var(--r-full);font-size:11px;font-weight:800;line-height:16px;white-space:nowrap;transition:opacity .15s}
   .pip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
   .pip-success{background:rgba(52,199,89,.12);color:#248A3D}
@@ -202,7 +214,7 @@
   /* Login */
   .art{position:relative;margin:8px 8px 0;height:330px;border-radius:48px;background:var(--surface-alt);overflow:hidden}
   .art.photo{background-size:cover;background-position:center}
-  .art.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(242,242,247,.92) 0%,rgba(242,242,247,.45) 36%,rgba(242,242,247,.12) 62%,rgba(242,242,247,.8) 100%)}
+  .art.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,22,27,.82) 0%,rgba(23,22,27,.42) 24%,rgba(23,22,27,0) 44%,rgba(242,242,247,0) 62%,rgba(242,242,247,.8) 100%)}   /* dark top so the white logo text reads clearly */
   .art.photo .contours path{stroke:rgba(255,255,255,.38)}
   .art-svg{position:absolute;inset:0;width:100%;height:100%}
   .art-svg .contours path{fill:none;stroke:#fff;stroke-width:1.3}
@@ -214,12 +226,26 @@
   @keyframes ping{0%{transform:scale(.7);opacity:.8}100%{transform:scale(2.8);opacity:0}}
   .art-top{position:absolute;top:62px;inset-inline:20px;display:flex;justify-content:space-between;align-items:center}
   .brand{display:flex;align-items:center;gap:10px}
-  .brand-name{font-family:"Nunito Sans";font-weight:900;font-size:15px;letter-spacing:-0.01em;line-height:1.1}
-  .brand-sub{font-size:11px;font-weight:700;color:var(--muted);line-height:1.3}
-  .glass-pill{background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:6px 12px;border-radius:var(--r-full);font-size:12px;font-weight:800}
-  .dev-fill{position:absolute;top:112px;inset-inline-end:20px;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px 0 4px;border-radius:var(--r-full);background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px dashed rgba(243,127,70,.75);font-size:12px;font-weight:800;transition:transform .15s}
-  .dev-fill:active{transform:scale(.96)}
-  .dev-fill iconify-icon{font-size:16px;color:var(--primary)}
+  .brand-name{font-family:"Nunito Sans";font-weight:900;font-size:15px;letter-spacing:-0.01em;line-height:1.1;color:#FFFFFF}
+  .brand-sub{font-size:11px;font-weight:700;color:#E0E4E8;line-height:1.3}
+  /* Login logo animation: pops in, the ring draws itself, the orange dot circles in once, then a soft halo pulse. */
+  .brand-mark{position:relative;display:block;width:38px;height:38px;flex:none;animation:bmIn .7s cubic-bezier(.2,.9,.3,1.25) both}
+  .brand-mark svg{position:relative;display:block}
+  .brand-mark i{position:absolute;inset:0;border-radius:50%;animation:bmHalo 2.8s ease-out 1.7s infinite}
+  .bm-ring{stroke-dasharray:50.3;stroke-dashoffset:50.3;animation:bmRing .9s ease-out .25s forwards}
+  .bm-orbit{transform-box:view-box;transform-origin:19px 19px;animation:bmOrbit 1.2s cubic-bezier(.45,0,.2,1) .5s both}
+  .brand > div{animation:bmText .5s ease .35s both}
+  @keyframes bmIn{from{transform:scale(.55) rotate(-25deg);opacity:0}}
+  @keyframes bmRing{to{stroke-dashoffset:0}}
+  @keyframes bmOrbit{from{transform:rotate(-360deg);opacity:0}25%{opacity:1}}
+  @keyframes bmHalo{0%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}70%,100%{box-shadow:0 0 0 12px rgba(255,255,255,0)}}
+  @keyframes bmText{from{opacity:0;transform:translateY(4px)}}
+  @media (prefers-reduced-motion:reduce){.brand-mark,.brand-mark i,.bm-orbit,.brand > div{animation:none}.bm-ring{animation:none;stroke-dashoffset:0}}
+  /* Dev-only demo fill, right under the image. */
+  .login-actions{display:flex;margin-bottom:22px}
+  .dev-fill{position:relative;display:flex;align-items:center;justify-content:center;height:44px;padding:0 20px;border-radius:var(--r-full);background:#fff;border:1.5px dashed rgba(243,127,70,.75);font-size:12px;font-weight:800;white-space:nowrap;transition:transform .15s}
+  .dev-fill:active{transform:scale(.97)}
+  .dev-fill .env{position:absolute;top:-9px;inset-inline-start:16px}
   .dev-fill .env{font-family:"Nunito Sans";font-size:10px;font-weight:900;letter-spacing:.08em;line-height:1;background:var(--primary);color:#fff;border-radius:var(--r-full);padding:5px 7px}
   .art-foot{position:absolute;bottom:20px;inset-inline:24px;display:flex;justify-content:flex-end}
   .coord{font-family:"Nunito Sans";font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);direction:ltr;unicode-bidi:isolate}
@@ -471,9 +497,6 @@
   }
 
   /* ───────── Project Manager additions ───────── */
-  .side-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
-  .side-list li{display:flex;gap:8px;align-items:flex-start;font-size:12px;font-weight:700;line-height:18px}
-  .side-list iconify-icon{font-size:16px;color:var(--primary);margin-top:1px}
   .rsec{background:var(--surface-alt);border-radius:var(--r-2xl);padding:18px 20px;margin-top:12px}
   .rsec h4{margin:0;font-size:16px;font-weight:800;line-height:24px}
   .rsec > .sec-sub{margin:0 0 14px}
@@ -527,26 +550,8 @@
       <p class="stage-sub">تطبيق مدير المشروع — عرض فقط، تجربة متصلة وقابلة للنقر بالكامل</p>
 
       <div class="side-card">
-        <h4>وضع التشغيل</h4>
-        <div class="seg fill" id="envSeg" role="group" aria-label="وضع التشغيل" style="margin-bottom:0">
-          <button type="button" data-env="development">تطوير</button><button type="button" data-env="testing">اختبار</button><button type="button" data-env="production">إنتاج</button>
-        </div>
-        <p class="side-note">زر «تعبئة بيانات تجريبية» يظهر في شاشة الدخول في وضعي التطوير والاختبار فقط، ولا يُضاف إلى الشاشة إطلاقًا في وضع الإنتاج.</p>
-      </div>
-
-      <div class="side-card">
         <h4 class="disclosure"><button type="button" id="flowToggle" aria-expanded="false" aria-controls="flowBody">الانتقال السريع إلى شاشة<iconify-icon icon="solar:alt-arrow-down-linear" aria-hidden="true"></iconify-icon></button></h4>
         <div class="collapse" id="flowBody" inert><div><nav class="flow" id="flow" aria-label="الانتقال السريع إلى شاشة"></nav></div></div>
-      </div>
-
-      <div class="side-card">
-        <h4>صلاحيات مدير المشروع</h4>
-        <ul class="side-list">
-          <li><iconify-icon icon="solar:eye-bold"></iconify-icon>عرض المشاريع المسندة فقط، للقراءة دون أي إضافة أو تعديل أو حذف.</li>
-          <li><iconify-icon icon="solar:download-minimalistic-bold"></iconify-icon>معاينة الملفات وتنزيلها.</li>
-          <li><iconify-icon icon="solar:chart-2-bold"></iconify-icon>تقارير وسجل نشاط للعرض فقط، دون تصدير.</li>
-          <li><iconify-icon icon="solar:eye-closed-bold"></iconify-icon>التحديثات المخفية من الإدارة لا تظهر في أي مكان.</li>
-        </ul>
       </div>
 
       <div class="side-card">
@@ -554,12 +559,6 @@
         <button class="side-btn" type="button" id="resetDemo"><iconify-icon icon="solar:refresh-bold"></iconify-icon>إعادة ضبط النموذج</button>
       </div>
 
-      <div class="side-card">
-        <h4>ألوان حالات المشروع (مقترحة)</h4>
-        <div class="legend-row">
-          <span class="pip pip-blue">لم يبدأ</span><span class="pip pip-success">جارٍ التنفيذ</span><span class="pip pip-neutral">انتهت المدة</span><span class="pip pip-warning">معلق مؤقتًا</span>
-        </div>
-      </div>
     </aside>
 
     <div class="phone" id="phone">
@@ -573,6 +572,8 @@
     </div>
   </div>
   <script src="switcher.js" data-app="pm"></script>
+  <script src="projects.js"></script>
+  <script src="intro.js"></script>
 </main>
 
 <script>
@@ -665,50 +666,11 @@ const USERS = {
 const DEACTIVATED = ['majed.o@company.sa'];
 const ALERT_DAYS = 60;   // "End date approaching" period — configured by admins in Settings.
 
-const STATUS = {
-  IN_PROGRESS: { label: 'جارٍ التنفيذ', short: 'جارٍ',    cls: 'pip-success', color: '#34C759' },
-  ON_HOLD:     { label: 'معلق مؤقتًا',  short: 'معلق',    cls: 'pip-warning', color: '#FF9500' },
-  ENDED:       { label: 'انتهت المدة',  short: 'منتهية',  cls: 'pip-neutral', color: '#8E8E93' },
-  NOT_STARTED: { label: 'لم يبدأ',      short: 'لم يبدأ', cls: 'pip-blue',    color: '#007AFF' },
-};
-// Single status function (AGENTS.md): dates decide, unless manually on hold.
-function computeStatus(p, today = TODAY) {
-  if (p.onHold) return 'ON_HOLD';
-  if (today < p.start) return 'NOT_STARTED';
-  if (today > p.end) return 'ENDED';
-  return 'IN_PROGRESS';
-}
+// Projects, statuses and the single status function are shared with the Employee app (projects.js).
+DO.init({ me: 'mohammed' });
+const { STATUS, PROJECTS, computeStatus, holdOf, inHold } = DO;
 
-// Site photos generated with Magnific (assets/photos): one cover per project plus work-in-progress shots.
 const PHOTO = n => `assets/photos/${n}.jpg`;
-// holds = suspension records (admin, mandatory reason); ext = end-date changes. Both appear in project details and the activity log.
-const PROJECTS = [
-  { code: 'PRJ-0142', name: 'ترميم قصر المصمك', short: 'قصر المصمك', cls: 'ترميم', loc: 'الرياض · حي الديرة', lat: 24.6312, lng: 46.7133,
-    photo: PHOTO('masmak-cover'), shots: ['masmak-plaster', 'masmak-scaffold', 'masmak-ceiling'].map(PHOTO),
-    start: '2026-09-15', end: '2027-01-12', team: ['ahmed', 'khalid', 'sara'], pms: ['me'], x: 75, y: 50,
-    ext: [{ at: '2026-10-22T11:30', from: '2026-12-15', to: '2027-01-12' }],
-    desc: 'ترميم شامل للواجهات الطينية والأبراج الدفاعية، يشمل معالجة الشقوق وإعادة تأهيل الأسقف الخشبية وفق معايير الحفاظ على التراث.' },
-  { code: 'PRJ-0138', name: 'مسح طبوغرافي لوادي حنيفة', short: 'وادي حنيفة', cls: 'مساحة', loc: 'الرياض · وادي حنيفة', lat: 24.6906, lng: 46.5820,
-    photo: PHOTO('wadi-cover'), shots: ['wadi-station', 'wadi-gnss', 'wadi-drone'].map(PHOTO),
-    start: '2026-10-01', end: '2026-12-20', team: ['ahmed', 'sara'], pms: ['me', 'reem'], x: 64, y: 55,
-    holds: [{ at: '2026-10-26T09:00', from: '2026-10-26', to: '2026-11-02', resumedAt: '2026-11-02T07:02', reason: 'ارتفاع منسوب المياه في مجرى الوادي بعد الأمطار.' }],
-    desc: 'رفع طبوغرافي تفصيلي لمجرى الوادي وضفافه لدعم أعمال التأهيل البيئي وتحديد مناسيب التصريف.' },
-  { code: 'PRJ-0127', name: 'توثيق موقع الحِجر الأثري', short: 'الحِجر', cls: 'تراثي وأثري', loc: 'العُلا · الحِجر', lat: 26.7920, lng: 37.9531,
-    photo: PHOTO('hegra-cover'), shots: ['hegra-inscription', 'hegra-scanner', 'hegra-excavation'].map(PHOTO),
-    start: '2026-06-01', end: '2026-12-31', onHold: true, team: ['ahmed', 'faisal'], pms: ['me', 'reem'], x: 30, y: 25,
-    holds: [{ at: '2026-10-18T15:10', from: '2026-10-18', reason: 'بانتظار تجديد تصريح العمل الميداني من هيئة التراث.' }],
-    desc: 'توثيق رقمي شامل للمدافن النبطية والنقوش الصخرية باستخدام المسح التصويري والليزري.' },
-  { code: 'PRJ-0119', name: 'إنشاء مبنى إداري', short: 'المبنى الإداري', cls: 'بناء', loc: 'جدة · حي الشاطئ', lat: 21.5810, lng: 39.1093,
-    photo: PHOTO('jeddah-cover'), shots: ['jeddah-concrete', 'jeddah-rebar', 'jeddah-facade'].map(PHOTO),
-    start: '2026-03-01', end: '2026-10-30', team: ['ahmed', 'faisal'], pms: ['me', 'abdullah'], x: 20, y: 47,
-    desc: 'إنشاء مبنى إداري من خمسة أدوار يشمل الأعمال الإنشائية والمعمارية والتمديدات الكهروميكانيكية.' },
-  { code: 'PRJ-0151', name: 'مسح مواقع الدرعية التاريخية', short: 'الدرعية', cls: 'مساحة', loc: 'الدرعية · حي الطريف', lat: 24.7340, lng: 46.5730,
-    photo: PHOTO('diriyah-cover'), shots: [],
-    start: '2026-11-15', end: '2027-03-15', team: ['ahmed', 'sara'], pms: ['me'], x: 60, y: 38,
-    desc: 'مسح وتوثيق المواقع التاريخية في حي الطريف تمهيدًا لأعمال التطوير والترميم.' },
-];
-const inHold = (p, d) => (p.holds || []).some(h => d >= h.from && (!h.to || d < h.to));
-const holdOf = p => p.onHold ? p.holds[p.holds.length - 1] : null;
 const FT = {
   img:   { icon: 'solar:gallery-bold', tint: 'var(--indigo)', label: 'صورة', preview: true },
   video: { icon: 'solar:videocamera-record-bold', tint: 'var(--blue)', label: 'فيديو', preview: true },
@@ -724,7 +686,7 @@ let S;
 function initialState() {
   return {
     authed: false, email: USERS.me.email, password: '12345678',
-    stack: [{ name: 'login', params: {} }],
+    stack: [{ name: 'splash', params: {} }],
     noProjects: false, homeFilter: 'ALL', mapSel: 'PRJ-0142', mapHide: [], cal: { y: 2026, m: 11, d: 2 },
     rep: { period: '30', p: 'ALL' },
     updates: [], atts: {}, direct: [], notes: [],
@@ -863,7 +825,7 @@ function activityOf(p) {
     add(h.at, 'status', 'تعليق المشروع مؤقتًا', `السبب: ${h.reason}`, 'noura', { icon: ['solar:pause-circle-bold', 'var(--warning)'] });
     if (h.resumedAt) add(h.resumedAt, 'status', 'استئناف المشروع', 'أُعيد احتساب الحالة من التواريخ: «جارٍ التنفيذ»', 'noura', { icon: ['solar:play-circle-bold', 'var(--success)'] });
   });
-  if (TODAY > p.end && !p.onHold) add(`${addDays(p.end, 1)}T00:00`, 'status', 'انتهت مدة المشروع', 'تغيّرت الحالة تلقائيًا إلى «انتهت المدة» دون تمديد', 'system', { icon: ['solar:flag-bold', 'var(--muted)'] });
+  if (TODAY > p.end && !holdOf(p)) add(`${addDays(p.end, 1)}T00:00`, 'status', 'انتهت مدة المشروع', 'تغيّرت الحالة تلقائيًا إلى «انتهت المدة» دون تمديد', 'system', { icon: ['solar:flag-bold', 'var(--muted)'] });
   S.direct.filter(f => f.p === p.code).forEach(f => add(`${f.date}T10:00`, 'file', 'رفع ملف إلى مكتبة المشروع', S.atts[f.a].name, f.who));
   updatesOf(p.code).forEach(u => add(u.at, 'update', 'تحديث يومي جديد', u.text, u.author, { u: u.id }));
   return ev.sort((a, b) => b.at - a.at);
@@ -897,6 +859,7 @@ function render(dir = 'none') {
   decorate(view);
   const sc = view.querySelector('.screen');
   if ((dir === 'back' || dir === 'stay') && e.scroll) sc.scrollTop = e.scroll;
+  r.after && r.after();
   syncSide();
 }
 const TABS = [['home', 'solar:home-2-bold', 'الرئيسية'], ['map', 'solar:map-point-bold', 'الخريطة'], ['reports', 'solar:chart-2-bold', 'التقارير'], ['calendar', 'solar:calendar-bold', 'التقويم'], ['profile', 'solar:user-circle-bold', 'حسابي']];
@@ -969,7 +932,7 @@ const NO_PROJECTS = 'لا توجد مشاريع مسندة إليك حاليًا
 const SCREENS = {};
 
 SCREENS.login = () => ({
-  sb: false, tab: null,
+  sb: false, tab: null, after() { $('#statusbar').classList.add('light'); },   // light status bar over the dark image top
   html: `<div class="art photo" style="background-image:url('${PHOTO('login-aerial')}')">
     <svg class="art-svg" viewBox="0 0 374 330" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <g class="contours" data-contours='{"cx":236,"cy":178,"n":15,"r0":12,"gap":15,"amp":0.15,"seed":1.2,"dx":-2.2,"dy":1.4}'></g>
@@ -980,15 +943,14 @@ SCREENS.login = () => ({
     </svg>
     <div class="art-top">
       <div class="brand">
-        <svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="19"/><circle cx="19" cy="19" r="8" fill="none" stroke="#fff" stroke-width="2.4"/><circle cx="26.6" cy="11.4" r="3.6" fill="#F37F46"/></svg>
+        <span class="brand-mark"><i></i><svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="19"/><circle class="bm-ring" cx="19" cy="19" r="8" fill="none" stroke="#fff" stroke-width="2.4" transform="rotate(-90 19 19)"/><g class="bm-orbit"><circle cx="26.6" cy="11.4" r="3.6" fill="#F37F46"/></g></svg></span>
         <div><div class="brand-name">Digital Operation</div><div class="brand-sub">التشغيل الرقمي</div></div>
       </div>
-      <span class="glass-pill">واجهة مدير المشروع</span>
     </div>
-    ${isDev() ? `<button class="dev-fill" type="button" data-act="fillDemo" aria-label="تعبئة بيانات الدخول التجريبية (وضع ${ENV === 'testing' ? 'الاختبار' : 'التطوير'})">${ICON('solar:magic-stick-3-bold')}تعبئة بيانات تجريبية<span class="env">${ENVS[ENV]}</span></button>` : ''}
     <div class="art-foot"><span class="coord">N 24.6312° · E 46.7133°</span></div>
   </div>
   <form class="login-form" data-submit="login" novalidate>
+    ${isDev() ? `<div class="login-actions"><button class="dev-fill" type="button" data-act="fillDemo" aria-label="تعبئة بيانات الدخول التجريبية">تعبئة بيانات تجريبية<span class="env">${ENVS[ENV]}</span></button></div>` : ''}
     <div class="kicker">تسجيل الدخول</div>
     <h2 class="h-lg">مرحبًا بعودتك</h2>
     <p class="lede">سجّل الدخول لمتابعة مشاريعك والاطلاع على التحديثات اليومية والتقارير.</p>
@@ -1002,6 +964,54 @@ SCREENS.login = () => ({
   </form>`,
 });
 
+/* Splash and onboarding (shared design in intro.js), worded for project managers. */
+const APP_ID = 'pm';
+const INTRO = {
+  role: 'واجهة مدير المشروع', tag: 'لمدير المشروع', tagIcon: 'solar:case-round-bold',
+  steps: [
+    { art: 'projects', alt: 'خريطة بطبقات كنتورية عليها دبابيس مواقع وبرج تراثي ورافعة', title: 'كل مشاريعك تحت إشرافك',
+      text: 'اطّلع على المشاريع المسندة إليك وحالاتها ومواقعها على الخريطة في مكان واحد.' },
+    { art: 'updates', alt: 'هاتف يعرض صورًا من الموقع بجانب خوذة وكاميرا ولوح ملاحظات', title: 'تحديثات الفرق الميدانية أولًا بأول',
+      text: 'شاهد التحديثات اليومية فور إضافتها مع الصور والملفات، للاطلاع والتنزيل دون أي تعديل.' },
+    { art: 'tracking', alt: 'تقويم ورسم بياني وجرس إشعارات وملف مستندات', title: 'تقارير وسجل نشاط واضح',
+      text: 'تابع أيام العمل ونشاط الفريق بالأرقام، وتصلك الإشعارات عند تغيّر الحالة أو اقتراب تاريخ النهاية.' },
+  ],
+};
+let splashT;
+SCREENS.splash = () => ({ sb: false, tab: null, html: DOIntro.splash(INTRO.role), after() {
+  $('#statusbar').classList.add('light');
+  clearTimeout(splashT);
+  splashT = setTimeout(() => { if (cur().name === 'splash') leaveSplash(); }, 2400);
+} });
+SCREENS.onboarding = ({ i = 0 }) => ({ sb: false, tab: null, html: DOIntro.onboarding({ ...INTRO, i: +i }),
+  after() { $('#statusbar').classList.add('light'); } });   // dark "Dusk" screen
+// Every launch: splash → 3 onboarding screens → login → home.
+function leaveSplash() {
+  clearTimeout(splashT);
+  S.stack = [{ name: 'onboarding', params: { i: 0 } }];
+  render('fade');
+}
+function obTo(i) {
+  const at = +(cur().params.i || 0);
+  if (i === at || i < 0) return;
+  if (i >= INTRO.steps.length) return finishIntro();
+  cur().params.i = i;
+  render(i > at ? 'fwd' : 'back');
+}
+function finishIntro() { S.stack = [{ name: 'login', params: {} }]; render('fade'); }
+
+
+// Home status chips keep their sideways position across re-renders, and the selected chip stays in view.
+let chipX = 0;
+function keepChipInView() {
+  const row = view.querySelector('.chips'), on = row && row.querySelector('[aria-pressed="true"]');
+  if (!row) return;
+  row.scrollLeft = chipX;
+  const r = row.getBoundingClientRect(), c = on.getBoundingClientRect(), pad = 24;
+  if (c.left < r.left + pad) row.scrollLeft -= r.left + pad - c.left;
+  else if (c.right > r.right - pad) row.scrollLeft += c.right - (r.right - pad);
+}
+
 SCREENS.home = () => {
   const projects = myProjects();
   const ws = projects.map(p => ({ p, s: computeStatus(p) }));
@@ -1012,7 +1022,7 @@ SCREENS.home = () => {
   const lastOf = code => updatesOf(code)[0];
   const sorted = [...ws].sort((a, b) => (lastOf(b.p.code)?.at || 0) - (lastOf(a.p.code)?.at || 0));
   const f = S.homeFilter, list = sorted.filter(x => f === 'ALL' || x.s === f);
-  const opts = [['ALL', 'الكل', ws.length], ...Object.entries(STATUS).map(([k, v]) => [k, v.short, ws.filter(x => x.s === k).length])];
+  const opts = [['ALL', 'الكل', ws.length], ...Object.entries(STATUS).map(([k, v]) => [k, v.label, ws.filter(x => x.s === k).length])];
   const card = ({ p, s }) => {
     const last = lastOf(p.code), n = updatesOf(p.code).filter(u => u.date === TODAY).length;
     const note = n ? `<span class="note">${ICON('solar:document-add-bold', 'var(--primary)')}${countAr(n, '', 'تحديث واحد', 'تحديثان', 'تحديثات', 'تحديثًا')} اليوم</span>`
@@ -1032,7 +1042,7 @@ SCREENS.home = () => {
   const unit = n => n === 0 ? 'لا توجد مشاريع مسندة' : n === 1 ? 'مشروع تحت إشرافك' : n === 2 ? 'مشروعان تحت إشرافك' : n <= 10 ? 'مشاريع تحت إشرافك' : 'مشروعًا تحت إشرافك';
   const feed = ups.slice(0, 2);
   const d = parse(TODAY);
-  return { tab: 0, html: `<div class="body with-tabs">
+  return { tab: 0, after: keepChipInView, html: `<div class="body with-tabs">
     <header class="appbar">
       <div class="who"><div class="avatar" aria-hidden="true">${USERS.me.i}</div><div><div class="kicker-sm">${WD[d.getDay()]}، ${d.getDate()} ${MONTHS[d.getMonth()]}</div><h2 class="h-md">صباح الخير، ${USERS.me.first}</h2></div></div>
       <button class="icon-btn" type="button" data-go="notifications" aria-label="الإشعارات${unread() ? ` — ${unread()} غير مقروءة` : ''}">${ICON('solar:bell-bold')}${unread() ? `<span class="badge" aria-hidden="true">${unread()}</span>` : ''}</button>
@@ -1051,7 +1061,7 @@ SCREENS.home = () => {
         <div class="tile-val"><span class="num">${soon}</span><div class="tile-label">مشروع جارٍ يقترب من تاريخ النهاية</div></div></div>
     </div>
     <div class="sec-head"><div><h3 class="h-md">مشاريعي</h3><div class="sec-sub">مرتبة حسب آخر تحديث</div></div></div>
-    ${projects.length ? `<div class="seg" role="group" aria-label="تصفية حسب الحالة">${opts.map(([k, l, c]) => `<button type="button" data-act="homeFilter" data-f="${k}" aria-pressed="${k === f}">${l}<span class="c">${c}</span></button>`).join('')}</div>` : ''}
+    ${projects.length ? `<div class="chips" role="group" aria-label="تصفية حسب الحالة">${opts.map(([k, l, c]) => `<button type="button" class="chip" data-act="homeFilter" data-f="${k}" aria-pressed="${k === f}">${k === 'ALL' ? '' : `<i style="background:${STATUS[k].color}"></i>`}${l}<span class="c">${c}</span></button>`).join('')}</div>` : ''}
     <div class="list">${listHTML}</div>
     ${feed.length ? `<div class="sec-head"><div><h3 class="h-md">آخر التحديثات</h3><div class="sec-sub">من الفرق الميدانية لمشاريعك</div></div></div><div class="stack">${feed.map(u => post(u, true)).join('')}</div>` : ''}
   </div>` };
@@ -1294,7 +1304,7 @@ SCREENS.map = () => {
       <div class="glass map-title"><div><strong>مواقع المشاريع</strong> <span class="muted" style="font-size:12px;font-weight:700"> · ${projects.length} من ${myProjects().length}</span></div>
         <button class="icon-btn" type="button" data-act="mapAll" aria-label="عرض كل الحالات">${ICON('solar:map-bold')}</button></div>
       <div class="glass map-legend" role="group" aria-label="تصفية حسب الحالة">${['IN_PROGRESS', 'ON_HOLD', 'ENDED', 'NOT_STARTED'].map(k =>
-        `<button type="button" class="pip ${STATUS[k].cls}${S.mapHide.includes(k) ? ' off' : ''}" data-act="mapFilter" data-s="${k}" aria-pressed="${!S.mapHide.includes(k)}">${STATUS[k].short}</button>`).join('')}</div>
+        `<button type="button" class="pip ${STATUS[k].cls}${S.mapHide.includes(k) ? ' off' : ''}" data-act="mapFilter" data-s="${k}" aria-pressed="${!S.mapHide.includes(k)}">${STATUS[k].label}</button>`).join('')}</div>
     </div>
     <div class="sheet">${sheet}</div>` };
 };
@@ -1331,7 +1341,7 @@ SCREENS.calendar = () => {
   </div>` };
 };
 
-const NT = { update: ['solar:document-add-bold', 'var(--primary)'], suspended: ['solar:pause-circle-bold', 'var(--warning)'], resumed: ['solar:play-circle-bold', 'var(--success)'],
+const NT = { update: ['solar:document-add-bold', 'var(--primary)'], status: ['solar:refresh-circle-bold', 'var(--blue)'], suspended: ['solar:pause-circle-bold', 'var(--warning)'], resumed: ['solar:play-circle-bold', 'var(--success)'],
   approaching: ['solar:hourglass-bold', 'var(--warning)'], ended: ['solar:flag-bold', 'var(--muted)'] };
 SCREENS.notifications = () => {
   const grp = n => { const d = Math.round((parse(TODAY) - parse(iso(n.at))) / 864e5); return d === 0 ? 'اليوم' : d === 1 ? 'أمس' : 'سابقًا'; };
@@ -1424,13 +1434,18 @@ const ACTIONS = {
   back,
   closeOverlay,
   fillDemo() { fillDemoLogin(); },
+  splashNext() { leaveSplash(); },
+  obNext() { obTo(+(cur().params.i || 0) + 1); },
+  obPrev() { obTo(+(cur().params.i || 0) - 1); },
+  obGo(el) { obTo(+el.dataset.i); },
+  obSkip() { finishIntro(); },
   eye(el) {
     const input = el.parentElement.querySelector('input'), show = input.type === 'password';
     input.type = show ? 'text' : 'password';
     el.setAttribute('aria-label', show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
     el.firstElementChild.setAttribute('icon', show ? 'solar:eye-closed-bold' : 'solar:eye-bold');
   },
-  homeFilter(el) { S.homeFilter = el.dataset.f; render('stay'); },
+  homeFilter(el) { chipX = el.parentElement.scrollLeft; S.homeFilter = el.dataset.f; render('stay'); },
   updFilter(el) { cur().params.who = el.dataset.f; cur().params.limit = 0; render('stay'); },
   fileFilter(el) { cur().params.f = el.dataset.f; cur().params.limit = 0; render('stay'); },
   actFilter(el) { cur().params.f = el.dataset.f; cur().params.limit = 0; render('stay'); },
@@ -1529,18 +1544,17 @@ phone.addEventListener('input', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#overlay').innerHTML) closeOverlay(); });
 
 /* Side panel */
-const FLOW = [['login', '01', 'تسجيل الدخول'], ['home', '02', 'الرئيسية'], ['project', '03', 'تفاصيل المشروع'], ['updates', '04', 'التحديثات اليومية'], ['update', '05', 'تفاصيل التحديث'],
-  ['files', '06', 'مكتبة الملفات'], ['activity', '07', 'سجل النشاط'], ['map', '08', 'الخريطة'], ['reports', '09', 'التقارير'], ['calendar', '10', 'التقويم'],
-  ['notifications', '11', 'الإشعارات'], ['profile', '12', 'حسابي'], ['password', '13', 'تغيير كلمة المرور'], ['email', '14', 'تغيير البريد الإلكتروني']];
+const FLOW = [['splash', '01', 'شاشة البداية'], ['onboarding', '02', 'التعريف بالتطبيق'], ['login', '03', 'تسجيل الدخول'], ['home', '04', 'الرئيسية'], ['project', '05', 'تفاصيل المشروع'],
+  ['updates', '06', 'التحديثات اليومية'], ['update', '07', 'تفاصيل التحديث'], ['files', '08', 'مكتبة الملفات'], ['activity', '09', 'سجل النشاط'], ['map', '10', 'الخريطة'],
+  ['reports', '11', 'التقارير'], ['calendar', '12', 'التقويم'], ['notifications', '13', 'الإشعارات'], ['profile', '14', 'حسابي'], ['password', '15', 'تغيير كلمة المرور'], ['email', '16', 'تغيير البريد الإلكتروني']];
 $('#flow').innerHTML = FLOW.map(([k, n, l]) => `<button type="button" data-jump="${k}"><span class="n">${n}</span>${l}</button>`).join('');
 function syncSide() {
   const name = cur().name;
   document.querySelectorAll('[data-jump]').forEach(b => b.setAttribute('aria-current', b.dataset.jump === name));
   $('#noProjects').checked = S.noProjects;
-  document.querySelectorAll('[data-env]').forEach(b => b.setAttribute('aria-pressed', b.dataset.env === ENV));
 }
 function jump(name) {
-  if (name === 'login') { S.authed = false; S.stack = [{ name: 'login', params: {} }]; return render('fade'); }
+  if (['splash', 'onboarding', 'login'].includes(name)) { S.authed = false; S.stack = [{ name, params: name === 'onboarding' ? { i: 0 } : {} }]; return render('fade'); }
   if (['project', 'updates', 'update', 'files', 'activity'].includes(name)) S.noProjects = false;
   S.authed = true;
   const p = { p: 'PRJ-0142' }, u = { u: updatesOf('PRJ-0142')[0].id };
@@ -1564,19 +1578,13 @@ function fillDemoLogin() {
   $('#lgEmail').value = S.email; $('#lgPass').value = S.password;
   $('#lgMsg').hidden = true; $('#lgPassBox').classList.remove('bad'); $('#lgEmail').focus();
 }
-$('#envSeg').addEventListener('click', e => {
-  const b = e.target.closest('[data-env]');
-  if (!b || b.dataset.env === ENV) return;
-  ENV = b.dataset.env;
-  if (cur().name === 'login') render('stay'); else syncSide();
-});
 $('#noProjects').addEventListener('change', e => {
   S.noProjects = e.target.checked; S.homeFilter = 'ALL';
   if (!S.authed) return;
   if (S.noProjects) S.stack = [S.stack[0].name === 'login' ? S.stack[0] : { name: TABS.some(t => t[0] === S.stack[0].name) ? S.stack[0].name : 'home', params: {} }];
   render('fade');
 });
-$('#resetDemo').addEventListener('click', start);
+$('#resetDemo').addEventListener('click', () => { DO.reset(); start(); });
 
 /* Boot */
 document.querySelector('#statusbar').innerHTML = `<span>9:41</span><span class="sb-icons">
@@ -1586,8 +1594,50 @@ document.querySelector('#statusbar').innerHTML = `<span>9:41</span><span class="
 function start() {
   S = initialState();
   buildData();
+  seenStatus = snapStatus();
   render('fade');
 }
+// Admin status changes (projects.js) reach this app live. BRD PM notifications: status change (with the suspend reason), ended.
+let seenStatus = {};
+const snapStatus = () => Object.fromEntries(PROJECTS.map(p => [p.code, computeStatus(p)]));
+DO.onChange((origin, undone) => {
+  const before = seenStatus;
+  seenStatus = snapStatus();
+  if (!undone) PROJECTS.filter(p => p.pms.includes('me')).forEach(p => {
+    const was = before[p.code], is = seenStatus[p.code];
+    if (!was || was === is) return;
+    const note = is === 'ON_HOLD' ? { type: 'suspended', title: 'تغيّرت حالة المشروع إلى «معلق مؤقتًا»', body: `${p.name} — السبب: ${holdOf(p).reason}` }
+      : is === 'ENDED' ? { type: 'ended', title: 'انتهت مدة المشروع دون تمديد', body: `${p.name} — انتهى في ${fmtDate(p.end)}` }
+      : { type: was === 'ON_HOLD' ? 'resumed' : 'status', title: `تغيّرت حالة المشروع إلى «${STATUS[is].label}»`,
+          body: `${p.name} — ${was === 'ON_HOLD' ? 'تم استئناف المشروع' : `تاريخ النهاية الآن ${fmtDate(p.end)}`}` };
+    S.notes.push({ id: 'c' + Date.now() + p.code, unread: true, p: p.code, at: now(), ...note });
+  });
+  if (S.authed && cur().name !== 'login') render('stay'); else syncSide();
+});
+// Chips on desktop: the mouse wheel scrolls them sideways and the mouse can drag them (touch and trackpads scroll natively).
+phone.addEventListener('wheel', e => {
+  const row = e.target.closest('.chips');
+  if (!row || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+  const max = row.scrollWidth - row.clientWidth, x = Math.abs(row.scrollLeft);
+  if ((e.deltaY > 0 && x >= max - 1) || (e.deltaY < 0 && x <= 0)) return;   // at an end: let the page scroll
+  e.preventDefault(); row.scrollLeft -= e.deltaY;   // RTL: scrolling forward moves toward the left
+}, { passive: false });
+let chipDrag = null;
+phone.addEventListener('pointerdown', e => {
+  const row = e.target.closest('.chips');
+  if (row && e.pointerType === 'mouse') chipDrag = { row, x: e.clientX, left: row.scrollLeft, moved: false };
+});
+phone.addEventListener('pointermove', e => {
+  if (!chipDrag) return;
+  const dx = e.clientX - chipDrag.x;
+  if (Math.abs(dx) > 4) { chipDrag.moved = true; chipDrag.row.classList.add('dragging'); }
+  if (chipDrag.moved) chipDrag.row.scrollLeft = chipDrag.left + dx;
+});
+addEventListener('pointerup', () => { if (chipDrag) { chipDrag.row.classList.remove('dragging'); setTimeout(() => { chipDrag = null; }, 0); } });
+phone.addEventListener('click', e => { if (chipDrag && chipDrag.moved && e.target.closest('.chips')) { e.stopPropagation(); e.preventDefault(); } }, true);
+
+DOIntro.bindSwipe(phone, () => cur().name === 'onboarding' && ACTIONS.obNext(), () => cur().name === 'onboarding' && ACTIONS.obPrev());
+
 decorate(document.querySelector('.stage-bg'));
 start();
 </script>

@@ -28,10 +28,12 @@
     document.title = `Digital Operation — ${app === 'pm' ? 'Project Manager App' : 'Employee App'}`;
     if (focus) { FRAMES[app].focus(); FRAMES[app].contentWindow.postMessage({ type: 'do:focus-switch' }, '*'); }
   }
-  // Only the two hosted apps may ask to switch.
+  // Only the two hosted apps may ask to switch, or share a project status change with the other app.
   addEventListener('message', e => {
-    const fromApp = Object.values(FRAMES).some(f => f.contentWindow === e.source);
-    if (fromApp && e.data && e.data.type === 'do:switch-app') show(e.data.app, true);
+    const from = Object.values(FRAMES).find(f => f.contentWindow === e.source);
+    if (!from || !e.data) return;
+    if (e.data.type === 'do:switch-app') show(e.data.app, true);
+    if (e.data.type === 'do:projects') Object.values(FRAMES).forEach(f => { if (f !== from) f.contentWindow.postMessage(e.data, '*'); });
   });
   addEventListener('hashchange', () => show(location.hash.slice(1)));
   show(location.hash.slice(1));
