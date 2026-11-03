@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Operation — Home Tiles Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,400..900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+<!--
+  Three design directions for each of the two summary tiles on the employee home screen
+  («تحديثاتي» and «بانتظار تحديثك»). For comparison only: nothing here is applied to
+  employee-app.html until a direction is chosen. Same tokens, fonts, content and data as the app
+  (4 updates over the last 7 days, 1 project awaiting today's update).
+  3D icons generated with Magnific (assets/concepts/tiles), used inside these two tiles only.
+-->
+<style>
+  :root{
+    --primary:#F37F46; --surface:#FFFFFF; --surface-alt:#F2F2F7; --muted:#6C6C70; --border:#E5E5EA;
+    --blue:#007AFF; --warning:#FF9500; --stage:#F6F6F8;
+    --r-md:14px; --r-lg:16px; --r-xl:24px; --r-2xl:28px; --r-3xl:32px; --r-full:9999px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--stage);color:#000;font-family:"Cairo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+  button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+  iconify-icon{display:inline-block;width:1em;height:1em;flex:none}
+  .num{font-family:"Nunito Sans",sans-serif;font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+
+  /* ───────── Page ───────── */
+  .page{max-width:1180px;margin:0 auto;padding:48px 24px 96px}
+  .kick{font-family:"Nunito Sans";font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);direction:ltr;text-align:right}
+  h1{margin:8px 0 8px;font-size:32px;font-weight:900;line-height:1.25}
+  .lead{margin:0;max-width:760px;font-size:14px;font-weight:600;line-height:24px;color:var(--muted)}
+  .scope{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:24px}
+  .scope div{background:#fff;border-radius:24px;padding:16px 18px;font-size:12px;font-weight:700;line-height:20px}
+  .scope b{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900;margin-bottom:4px}
+  .scope b iconify-icon{font-size:18px;color:var(--primary)}
+  .scope .out b iconify-icon{color:var(--muted)}
+  .scope span{color:var(--muted)}
+
+  .part{margin-top:56px}
+  .p-head{display:flex;align-items:center;gap:12px}
+  .p-head .n{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#000;color:#fff;font-family:"Nunito Sans";font-weight:900;font-size:15px;flex:none}
+  .p-head h2{margin:0;font-size:22px;font-weight:900;line-height:32px}
+  .p-head p{margin:0;font-size:13px;font-weight:600;color:var(--muted)}
+  .opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:20px}
+  .opt{background:#fff;border-radius:28px;padding:18px 18px 20px;display:flex;flex-direction:column;gap:14px}
+  .opt.cur{background:transparent;box-shadow:inset 0 0 0 1.5px var(--border)}
+  .o-tag{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:900}
+  .o-tag i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-style:normal;font-family:"Nunito Sans";font-size:12px;font-weight:900}
+  .opt.cur .o-tag i{background:var(--border);color:#000}
+  .o-tag small{font-size:11px;font-weight:800;color:var(--muted)}
+  .o-stage{display:grid;place-items:center;padding:16px 0 6px;background:var(--surface);border-radius:20px}
+  .opt:not(.cur) .o-stage{background:#FAFAFB}
+  .o-stage .tile{width:165px;zoom:1.15}
+  .o-notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;line-height:19px}
+  .o-notes li{display:flex;gap:6px}
+  .o-notes li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--primary);margin-top:7px;flex:none}
+  .opt.cur .o-notes li::before{background:#C7C7CC}
+
+  /* Combined preview */
+  .combo{margin-top:64px;display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:32px;align-items:start}
+  .pick h2{margin:0 0 6px;font-size:22px;font-weight:900}
+  .pick p{margin:0 0 18px;font-size:13px;font-weight:600;line-height:22px;color:var(--muted)}
+  .pick-row{margin-bottom:16px}
+  .pick-row .lbl{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px}
+  .seg{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:var(--r-full);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .seg button{height:38px;min-width:48px;padding:0 12px;border-radius:var(--r-full);font-size:13px;font-weight:800;color:var(--muted)}
+  .seg button[aria-pressed="true"]{background:#000;color:#fff}
+  .phone{width:390px;border-radius:44px;background:#fff;padding:0 24px 24px;overflow:hidden;box-shadow:0 0 0 10px #0B0B0C,0 0 0 11px #2C2C2E,0 40px 70px -30px rgba(0,0,0,.35);margin:11px}
+  .hero-edge{height:58px;margin:0 -0px;border-radius:0 0 var(--r-3xl) var(--r-3xl);background:var(--primary);box-shadow:0 10px 25px -5px rgba(243,127,70,.20);display:flex;align-items:flex-end;padding:0 24px 16px;gap:8px;color:#fff;font-size:12px;font-weight:700}
+  .hero-edge span{background:rgba(255,255,255,.2);padding:6px 12px;border-radius:var(--r-full)}
+  .sec-head{margin:34px 0 0}
+  .sec-head h3{margin:0;font-size:18px;font-weight:800;line-height:26px}
+  .sec-head div{font-size:12px;font-weight:700;color:var(--muted)}
+
+  /* ───────── App components, as in employee-app.html (the "current" design) ───────── */
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .tile{position:relative;background:var(--surface-alt);border-radius:var(--r-2xl);padding:18px;display:flex;flex-direction:column;min-height:172px;text-align:right}
+  .tile-top{display:flex;justify-content:space-between;align-items:flex-start}
+  .halo{width:40px;height:40px;border-radius:var(--r-full);background:#fff;display:grid;place-items:center;flex:none}
+  .halo iconify-icon{font-size:22px}
+  .tag{font-size:10px;font-weight:800;padding:3px 8px;border-radius:var(--r-full);background:#fff;color:var(--muted);white-space:nowrap}
+  .tile-val{margin-top:auto}
+  .tile-val .num{font-size:26px;line-height:1;display:block}
+  .tile-label{font-size:12px;font-weight:700;color:var(--muted);line-height:18px;margin-top:6px}
+  .bars{display:flex;gap:4px;align-items:flex-end;height:34px;margin:14px 0 12px}
+  .bars i{flex:1;height:100%;background:#fff;border-radius:6px 6px 4px 4px;position:relative;overflow:hidden}
+  .bars i b{position:absolute;bottom:0;left:0;right:0;background:rgba(243,127,70,.4);border-radius:inherit}
+  .bars i.today b{background:var(--primary)}
+  .ico3d{display:block;pointer-events:none;user-select:none}
+
+  /* ── A · Refined (no 3D): tinted icon halo, clearer week bars, number and label read together ── */
+  .tile.vA .halo{background:rgba(0,122,255,.12)}
+  .tile.vA.pend .halo{background:rgba(255,149,0,.14)}
+  .tile.vA .bars{height:40px;gap:5px;margin:16px 0 14px}
+  .tile.vA .bars i{background:transparent;overflow:visible;border-radius:var(--r-full)}
+  .tile.vA .bars i::before{content:"";position:absolute;bottom:0;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#D1D1D6}   /* day without updates */
+  .tile.vA .bars i b{border-radius:var(--r-full);background:rgba(243,127,70,.32);z-index:1}
+  .tile.vA .bars i.today b{background:var(--primary);box-shadow:0 6px 14px -4px rgba(243,127,70,.7)}
+  .tile.vA .tile-val .num{font-size:30px}
+  .tile.vA .row{display:flex;align-items:baseline;gap:8px}
+  .tile.vA .row .tile-label{margin:0;color:#000;font-size:13px;font-weight:800}
+  .tile.vA .tag.live{display:inline-flex;align-items:center;gap:5px;color:#B25000;background:#fff}
+  .tile.vA .tag.live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--warning);animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 4px rgba(255,149,0,.2)}}
+
+  /* ── B · Floating 3D icon: the icon rises above the tile edge; week bars sit in a white tray ── */
+  .tile.vB{padding-top:14px}
+  .tile.vB .tile-top{align-items:center;height:44px}
+  .tile.vB .ico3d{width:62px;height:62px;margin:-26px -6px 0 0;filter:drop-shadow(0 10px 12px rgba(0,0,0,.14))}
+  .tile.vB .tray{background:#fff;border-radius:var(--r-lg);padding:8px;margin:12px 0 14px}
+  .tile.vB .tray .bars{height:30px;margin:0;gap:4px}
+  .tile.vB .tray .bars i{background:var(--surface-alt)}
+  .tile.vB .tile-val .num{font-size:28px}
+
+  /* ── C · Soft tinted card: a gentle wash of the tile's colour, a large 3D icon in the corner ── */
+  .tile.vC{overflow:hidden;background:linear-gradient(160deg,#E6F0FF 0%,#EEF2FA 45%,var(--surface-alt) 100%)}
+  .tile.vC.pend{background:linear-gradient(160deg,#FFEBDD 0%,#F8EEE8 45%,var(--surface-alt) 100%)}
+  .tile.vC .ico3d{position:absolute;top:10px;left:6px;width:78px;height:78px;filter:drop-shadow(0 12px 14px rgba(0,0,0,.12))}
+  .tile.vC .tile-val{margin-top:0}
+  .tile.vC .tile-val .num{font-size:34px}
+  .tile.vC .foot{margin-top:auto;padding-top:12px}
+  .tile.vC .foot .tile-label{margin-top:8px}
+  .tile.vC .tag{background:rgba(255,255,255,.75)}
+  .tile.vC .bars{height:30px;margin:10px 0 0}
+  .tile.vC .bars i{background:rgba(255,255,255,.8)}
+
+  /* ── D · Ring: the seven days become segments of a ring around the number (no 3D) ── */
+  .tile.vD .tile-top{justify-content:flex-end}
+  .tile.vD .ring{position:relative;width:88px;height:88px;margin:4px auto 0}
+  .tile.vD .ring svg{position:absolute;inset:0;overflow:visible}
+  .tile.vD .ring .num{position:absolute;inset:0;display:grid;place-items:center;font-size:28px;line-height:1}
+  .tile.vD .seg-empty{stroke:#fff}
+  .tile.vD .seg-on{stroke:rgba(243,127,70,.4)}
+  .tile.vD .seg-today{stroke:var(--primary)}
+  .tile.vD .wait-track{stroke:#fff}
+  .tile.vD .wait-arc{stroke:var(--warning);stroke-dasharray:46 230;transform-origin:44px 44px;animation:waitSpin 3.2s linear infinite}
+  @keyframes waitSpin{to{transform:rotate(-360deg)}}
+  .tile.vD .tile-label{text-align:center;margin-top:10px}
+
+  /* ── E · Dusk: dark tile in the splash/onboarding colour, warm glow, 3D icon ── */
+  .tile.vE{background:radial-gradient(120% 70% at 100% 0%,rgba(243,127,70,.28),rgba(243,127,70,0) 60%),#17161B;color:#fff}
+  .tile.vE .ico3d{width:46px;height:46px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.45))}
+  .tile.vE .tag{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+  .tile.vE .tile-label{color:rgba(235,235,245,.7)}
+  .tile.vE .bars i{background:rgba(255,255,255,.08)}
+  .tile.vE .bars i b{background:rgba(243,127,70,.5)}
+  .tile.vE .bars i.today b{background:var(--primary);box-shadow:0 0 12px rgba(243,127,70,.8)}
+
+  /* ── F · Horizontal rows: the two tiles become two full-width rows, one above the other ── */
+  .tile.vF{flex-direction:row;align-items:center;gap:12px;min-height:0;padding:12px 16px 12px 18px;border-radius:var(--r-xl)}
+  .tile.vF .ico3d{width:52px;height:52px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.12))}
+  .tile.vF .txt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+  .tile.vF .tile-label{margin:0;color:#000;font-size:13px;font-weight:800;line-height:20px}
+  .tile.vF .bars{width:66px;height:28px;margin:0;gap:3px;flex:none}
+  .tile.vF .bars i{border-radius:4px}
+  .tile.vF .num{font-size:28px;line-height:1;min-width:24px;text-align:left}
+  .opt.wide{grid-column:span 2}
+  .opt.wide .o-stage .tile{width:342px;zoom:1.1}
+  .opt.wide .o-stage{gap:10px;grid-auto-flow:row}
+  .tiles.stack{grid-template-columns:1fr;gap:10px}
+
+  @media (max-width:1100px){ .opts{grid-template-columns:repeat(2,minmax(0,1fr))} .combo{grid-template-columns:1fr} }
+  @media (max-width:560px){ .opts{grid-template-columns:1fr} .opt.wide{grid-column:auto} .opt.wide .o-stage .tile{zoom:.85} .phone{width:100%;max-width:390px} }
+  @media (prefers-reduced-motion:reduce){ .tile.vA .tag.live::before,.tile.vD .wait-arc{animation:none} }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="kick">Home summary tiles · 6 directions per tile</div>
+  <h1>مقترحات بطاقتي الملخص في الرئيسية</h1>
+  <p class="lead">ستة اتجاهات (A–F) لكل بطاقة من البطاقتين في الصورة، بنفس الألوان والخطوط والمحتوى والبيانات الحالية. أيقونات الـ 3D مستخدمة داخل هاتين البطاقتين فقط. لم يُطبَّق أي شيء على التطبيق بعد — اختر اتجاهًا لكل بطاقة (ويمكن الجمع بين اتجاهين مختلفين).</p>
+
+  <section class="scope" aria-label="العناصر المحددة في الصورة">
+    <div><b><iconify-icon icon="solar:document-text-bold"></iconify-icon>١ · بطاقة «تحديثاتي»</b><span>الأيقونة، وسم «آخر 7 أيام»، أعمدة الأيام السبعة (اليوم بالبرتقالي)، الرقم «4»، وعنوان «تحديثاتي».</span></div>
+    <div><b><iconify-icon icon="solar:clock-circle-bold"></iconify-icon>٢ · بطاقة «بانتظار تحديثك»</b><span>الأيقونة، وسم «اليوم»، الرقم «1»، ونص «مشروع جارٍ بانتظار تحديثك اليوم».</span></div>
+    <div><b><iconify-icon icon="solar:widget-2-bold"></iconify-icon>المشترك بينهما</b><span>شكل البطاقة نفسها: الخلفية، والزوايا، والارتفاع المتساوي، والمسافة بين البطاقتين.</span></div>
+    <div class="out"><b><iconify-icon icon="solar:eye-closed-bold"></iconify-icon>خارج النطاق</b><span>البطاقة البرتقالية الظاهر طرفها أعلى الصورة، وقائمة «مشاريعي» وباقي الشاشة — تبقى كما هي.</span></div>
+  </section>
+
+  <section class="part" aria-labelledby="p1">
+    <div class="p-head"><span class="n">1</span><div><h2 id="p1">بطاقة «تحديثاتي»</h2><p>عدد تحديثاتك خلال آخر 7 أيام، مع عمود لكل يوم.</p></div></div>
+    <div class="opts" data-part="updates"></div>
+  </section>
+
+  <section class="part" aria-labelledby="p2">
+    <div class="p-head"><span class="n">2</span><div><h2 id="p2">بطاقة «بانتظار تحديثك»</h2><p>عدد المشاريع الجارية التي لم تُضف لها تحديث اليوم.</p></div></div>
+    <div class="opts" data-part="pending"></div>
+  </section>
+
+  <section class="combo" aria-labelledby="cmb">
+    <div class="pick">
+      <h2 id="cmb">معاينة البطاقتين معًا</h2>
+      <p>اختر اتجاهًا لكل بطاقة لترى شكلهما جنبًا إلى جنب كما في الشاشة الرئيسية، بنفس المقاس الفعلي.</p>
+      <div class="pick-row"><div class="lbl">بطاقة «تحديثاتي»</div><div class="seg" role="group" aria-label="اتجاه بطاقة تحديثاتي" data-pick="updates"></div></div>
+      <div class="pick-row"><div class="lbl">بطاقة «بانتظار تحديثك»</div><div class="seg" role="group" aria-label="اتجاه بطاقة بانتظار تحديثك" data-pick="pending"></div></div>
+    </div>
+    <div class="phone" aria-label="معاينة جزء الشاشة الرئيسية">
+      <div class="hero-edge" aria-hidden="true"><span>تحديث واحد أضفته اليوم</span></div>
+      <div class="tiles" id="comboTiles"></div>
+      <div class="sec-head"><h3>مشاريعي</h3><div>مرتبة حسب آخر تحديث</div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Same data as the app on 2026-11-02: one update on each of 4 of the last 7 days (today last), 1 project pending.
+  const WEEK = [0, 1, 1, 0, 0, 1, 1], PENDING = 1;
+  const MAX = Math.max(1, ...WEEK), TOTAL = WEEK.reduce((a, b) => a + b, 0);
+  const ICON = (i, c) => `<iconify-icon icon="${i}" style="color:${c}"></iconify-icon>`;
+  const IMG = n => `<img class="ico3d" src="assets/concepts/tiles/${n}.png" alt="" width="256" height="256">`;
+  const bars = () => `<div class="bars" aria-hidden="true">${WEEK.map((v, i) => `<i class="${i === 6 ? 'today' : ''}">${v ? `<b style="height:${Math.max(18, v / MAX * 100)}%"></b>` : ''}</i>`).join('')}</div>`;
+  const val = (n, label) => `<div class="tile-val"><span class="num">${n}</span><div class="tile-label">${label}</div></div>`;
+  const L_UPD = 'تحديثاتي', L_PEND = 'مشروع جارٍ بانتظار تحديثك اليوم';
+  // Ring of 7 segments, oldest first, running clockwise from the top (today ends just before the top).
+  const R = 38, CIRC = 2 * Math.PI * R, SEG = CIRC / 7 - 6;
+  const ring = () => `<svg viewBox="0 0 88 88" aria-hidden="true">${WEEK.map((v, i) => `<circle class="${i === 6 ? 'seg-today' : v ? 'seg-on' : 'seg-empty'}" cx="44" cy="44" r="${R}" fill="none" stroke-width="9" stroke-linecap="round"
+      stroke-dasharray="${SEG.toFixed(2)} ${CIRC.toFixed(2)}" transform="rotate(${(-90 + i * 360 / 7 + 3 * 360 / CIRC).toFixed(2)} 44 44)"/>`).join('')}</svg>`;
+  const waitRing = () => `<svg viewBox="0 0 88 88" aria-hidden="true"><circle class="wait-track" cx="44" cy="44" r="${R}" fill="none" stroke-width="9"/>${PENDING ? `<circle class="wait-arc" cx="44" cy="44" r="${R}" fill="none" stroke-width="9" stroke-linecap="round"/>` : ''}</svg>`;
+
+  const TILES = {
+    updates: {
+      cur: () => `<div class="tile"><div class="tile-top"><div class="halo">${ICON('solar:document-text-bold', 'var(--blue)')}</div><span class="tag">آخر 7 أيام</span></div>${bars()}${val(TOTAL, L_UPD)}</div>`,
+      A: () => `<div class="tile vA"><div class="tile-top"><div class="halo">${ICON('solar:document-text-bold', 'var(--blue)')}</div><span class="tag">آخر 7 أيام</span></div>${bars()}
+        <div class="tile-val"><div class="row"><span class="num">${TOTAL}</span><div class="tile-label">${L_UPD}</div></div></div></div>`,
+      B: () => `<div class="tile vB"><div class="tile-top">${IMG('updates-doc')}<span class="tag">آخر 7 أيام</span></div><div class="tray">${bars()}</div>${val(TOTAL, L_UPD)}</div>`,
+      C: () => `<div class="tile vC">${IMG('updates-clipboard')}${val(TOTAL, L_UPD)}<div class="foot"><span class="tag">آخر 7 أيام</span>${bars()}</div></div>`,
+      D: () => `<div class="tile vD"><div class="tile-top"><span class="tag">آخر 7 أيام</span></div><div class="ring">${ring()}<span class="num">${TOTAL}</span></div><div class="tile-label">${L_UPD}</div></div>`,
+      E: () => `<div class="tile vE"><div class="tile-top">${IMG('updates-doc')}<span class="tag">آخر 7 أيام</span></div>${bars()}${val(TOTAL, L_UPD)}</div>`,
+      F: () => `<div class="tile vF">${IMG('updates-clipboard')}<div class="txt"><div class="tile-label">${L_UPD}</div><span class="tag">آخر 7 أيام</span></div>${bars()}<span class="num">${TOTAL}</span></div>`,
+    },
+    pending: {
+      cur: () => `<div class="tile"><div class="tile-top"><div class="halo">${ICON('solar:clock-circle-bold', 'var(--warning)')}</div><span class="tag">اليوم</span></div>${val(PENDING, L_PEND)}</div>`,
+      A: () => `<div class="tile vA pend"><div class="tile-top"><div class="halo">${ICON('solar:clock-circle-bold', 'var(--warning)')}</div><span class="tag${PENDING ? ' live' : ''}">اليوم</span></div>${val(PENDING, L_PEND)}</div>`,
+      B: () => `<div class="tile vB pend"><div class="tile-top">${IMG('pending-clock')}<span class="tag">اليوم</span></div>${val(PENDING, L_PEND)}</div>`,
+      C: () => `<div class="tile vC pend">${IMG('pending-hourglass')}<div class="tile-val"><span class="num">${PENDING}</span></div><div class="foot"><span class="tag">اليوم</span><div class="tile-label">${L_PEND}</div></div></div>`,
+      D: () => `<div class="tile vD pend"><div class="tile-top"><span class="tag">اليوم</span></div><div class="ring">${waitRing()}<span class="num">${PENDING}</span></div><div class="tile-label">${L_PEND}</div></div>`,
+      E: () => `<div class="tile vE pend"><div class="tile-top">${IMG('pending-clock')}<span class="tag">اليوم</span></div>${val(PENDING, L_PEND)}</div>`,
+      F: () => `<div class="tile vF pend">${IMG('pending-hourglass')}<div class="txt"><div class="tile-label">${L_PEND}</div><span class="tag">اليوم</span></div><span class="num">${PENDING}</span></div>`,
+    },
+  };
+
+  const NOTES = {
+    updates: {
+      cur: ['أيقونة مسطحة داخل دائرة بيضاء.', 'الأيام بلا تحديثات أعمدة بيضاء فارغة.', 'الرقم والعنوان في سطرين.'],
+      A: ['بدون 3D: نفس الأيقونة داخل دائرة بلون أزرق خفيف.', 'اليوم بلا تحديثات نقطة صغيرة بدل عمود فارغ، فيتضح الفرق بين الأيام.', 'عمود اليوم برتقالي مع توهج خفيف.', 'الرقم والعنوان يُقرآن معًا في سطر واحد.'],
+      B: ['أيقونة 3D (مستند وقلم) تبرز فوق حافة البطاقة.', 'أعمدة الأيام داخل لوح أبيض صغير.', 'الرقم والعنوان كما هما.'],
+      C: ['خلفية بلمسة زرقاء ناعمة تتدرج إلى الرمادي.', 'أيقونة 3D كبيرة (حافظة وصورة) في الزاوية.', 'الرقم أكبر في الأعلى، والوسم والأعمدة في الأسفل.'],
+      D: ['بدون 3D: الأيام السبعة تصبح أجزاء حلقة حول الرقم.', 'جزء اليوم برتقالي، والأيام التي فيها تحديثات بلون أفتح، والفارغة بيضاء.', 'تبدأ الحلقة بأقدم يوم من الأعلى وتنتهي باليوم.'],
+      E: ['بطاقة داكنة بلون شاشة البداية والتعريف، مع توهج برتقالي في الزاوية.', 'أيقونة 3D (مستند وقلم) صغيرة.', 'أعمدة الأيام تتوهج على الخلفية الداكنة.'],
+      F: ['تتحول البطاقتان إلى صفّين بعرض الشاشة، واحد فوق الآخر.', 'في كل صف: أيقونة 3D صغيرة، ثم العنوان والوسم، ثم الأعمدة والرقم.', 'يُطبَّق على البطاقتين معًا.'],
+    },
+    pending: {
+      cur: ['أيقونة ساعة مسطحة داخل دائرة بيضاء.', 'الرقم والنص في الأسفل.'],
+      A: ['بدون 3D: نفس الأيقونة داخل دائرة بلون برتقالي خفيف.', 'نقطة برتقالية تنبض بهدوء في وسم «اليوم» ما دام هناك مشروع ينتظر تحديثك.', 'الرقم أكبر قليلًا.'],
+      B: ['أيقونة 3D (منبّه برتقالي) تبرز فوق حافة البطاقة، بنفس أسلوب «تحديثاتي» في B.', 'الرقم والنص كما هما.'],
+      C: ['خلفية بلمسة برتقالية دافئة تتدرج إلى الرمادي.', 'أيقونة 3D كبيرة (ساعة رملية) في الزاوية.', 'الرقم في الأعلى، والوسم والنص في الأسفل.'],
+      D: ['بدون 3D: الرقم داخل حلقة بنفس مقاس «تحديثاتي» في D.', 'قوس برتقالي يدور ببطء حول الرقم ما دام هناك مشروع ينتظر تحديثك، ويختفي عند الصفر.'],
+      E: ['بطاقة داكنة بلون شاشة البداية والتعريف، مع توهج برتقالي في الزاوية.', 'أيقونة 3D (منبّه برتقالي) صغيرة.', 'الرقم أبيض والنص فاتح.'],
+      F: ['صف بعرض الشاشة تحت صف «تحديثاتي».', 'أيقونة 3D (ساعة رملية) صغيرة، ثم النص والوسم، والرقم في الطرف.', 'يُطبَّق على البطاقتين معًا.'],
+    },
+  };
+  const NAMES = { cur: ['الحالي', 'كما في التطبيق الآن'], A: ['A', 'مُحسّن بدون 3D'], B: ['B', 'أيقونة 3D بارزة'], C: ['C', 'بطاقة ملوّنة ناعمة'],
+    D: ['D', 'حلقة دائرية بدون 3D'], E: ['E', 'بطاقة داكنة بلون البداية'], F: ['F', 'صفّان أفقيان'] };
+  const KEYS = ['cur', 'A', 'B', 'C', 'D', 'E', 'F'];
+
+  document.querySelectorAll('.opts').forEach(box => {
+    const part = box.dataset.part;
+    box.innerHTML = KEYS.map(k => `<article class="opt${k === 'cur' ? ' cur' : ''}${k === 'F' ? ' wide' : ''}">
+      <div class="o-tag"><i>${k === 'cur' ? '•' : k}</i>${k === 'cur' ? NAMES[k][0] : 'الاتجاه ' + k} <small>${NAMES[k][1]}</small></div>
+      <div class="o-stage">${TILES[part][k]()}</div>
+      <ul class="o-notes">${NOTES[part][k].map(n => `<li>${n}</li>`).join('')}</ul></article>`).join('');
+  });
+
+  const pick = { updates: 'A', pending: 'A' };
+  function drawCombo() {
+    const box = document.getElementById('comboTiles');
+    box.classList.toggle('stack', pick.updates === 'F');
+    box.innerHTML = TILES.updates[pick.updates]() + TILES.pending[pick.pending]();
+    document.querySelectorAll('[data-pick]').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === pick[seg.dataset.pick])));
+  }
+  document.querySelectorAll('[data-pick]').forEach(seg => {
+    seg.innerHTML = KEYS.map(k => `<button type="button" data-k="${k}">${k === 'cur' ? 'الحالي' : k}</button>`).join('');
+    // F (two full-width rows) only works for both tiles together; leaving it moves both to the new choice.
+    seg.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const k = b.dataset.k, other = seg.dataset.pick === 'updates' ? 'pending' : 'updates';
+      pick[seg.dataset.pick] = k;
+      if (k === 'F' || pick[other] === 'F') pick[other] = k;
+      drawCombo();
+    });
+  });
+  drawCombo();
+</script>
+</body>
+</html>

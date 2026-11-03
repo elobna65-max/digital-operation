@@ -290,12 +290,17 @@
   .dates span{display:block;font-size:12px;font-weight:700;opacity:.85}
   .dates strong{font-size:14px;font-weight:800}
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-  .tile{background:var(--surface-alt);border-radius:var(--r-2xl);padding:18px;display:flex;flex-direction:column;min-height:172px}
-  .tile-top{display:flex;justify-content:space-between;align-items:flex-start}
-  .tile .halo{width:40px;height:40px}
-  .tile-val{margin-top:auto}
-  .tile-val .num{font-size:26px;line-height:1;display:block}
+  /* Home summary tiles (direction C from home-tiles-concepts.html): a soft wash of the tile's colour, a large 3D icon in the corner */
+  .tile{position:relative;overflow:hidden;background:linear-gradient(160deg,#E6F0FF 0%,#EEF2FA 45%,var(--surface-alt) 100%);border-radius:var(--r-2xl);padding:18px;display:flex;flex-direction:column;min-height:172px}
+  .tile.pend{background:linear-gradient(160deg,#FFEBDD 0%,#F8EEE8 45%,var(--surface-alt) 100%)}
+  .tile .ico3d{position:absolute;top:12px;left:9px;width:64px;height:64px;pointer-events:none;user-select:none;filter:drop-shadow(0 12px 14px rgba(0,0,0,.12))}
+  .tile .tag{background:rgba(255,255,255,.75)}
+  .tile-val .num{font-size:34px;line-height:1;display:block}
   .tile-label{font-size:12px;font-weight:700;color:var(--muted);line-height:18px;margin-top:6px}
+  .tile-foot{margin-top:auto;padding-top:12px}
+  .tile-foot .tile-label{margin-top:8px}
+  .tile .bars{height:30px;margin:10px 0 0}
+  .tile .bars i{background:rgba(255,255,255,.8)}
   .bars{display:flex;gap:4px;align-items:flex-end;height:34px;margin:14px 0 12px}
   .bars i{flex:1;height:100%;background:#fff;border-radius:6px 6px 4px 4px;position:relative;overflow:hidden}
   .bars i b{position:absolute;bottom:0;left:0;right:0;background:rgba(243,127,70,.4);border-radius:inherit}
@@ -1005,11 +1010,13 @@ SCREENS.home = () => {
       ${active.length ? `<div class="hero-actions"><button class="btn-white" type="button" data-act="pickProject">${ICON('solar:add-circle-bold')}إضافة تحديث اليوم</button><span class="badge-pill">${ICON('solar:check-circle-bold')}${todayText}</span></div>` : ''}
     </section>
     <div class="tiles">
-      <div class="tile"><div class="tile-top"><div class="halo">${ICON('solar:document-text-bold', 'var(--blue)')}</div><span class="tag">آخر 7 أيام</span></div>
-        <div class="bars" aria-hidden="true">${week.map((v, i) => `<i class="${i === 6 ? 'today' : ''}"><b style="height:${v ? Math.max(18, v / max * 100) : 0}%"></b></i>`).join('')}</div>
-        <div class="tile-val"><span class="num">${week.reduce((a, b) => a + b, 0)}</span><div class="tile-label">تحديثاتي</div></div></div>
-      <div class="tile"><div class="tile-top"><div class="halo">${ICON('solar:clock-circle-bold', 'var(--warning)')}</div><span class="tag">اليوم</span></div>
-        <div class="tile-val"><span class="num">${pending}</span><div class="tile-label">مشروع جارٍ بانتظار تحديثك اليوم</div></div></div>
+      <div class="tile"><img class="ico3d" src="assets/icons/updates-clipboard.png" alt="" width="256" height="256">
+        <div class="tile-val"><span class="num">${week.reduce((a, b) => a + b, 0)}</span><div class="tile-label">تحديثاتي</div></div>
+        <div class="tile-foot"><span class="tag">آخر 7 أيام</span>
+          <div class="bars" aria-hidden="true">${week.map((v, i) => `<i class="${i === 6 ? 'today' : ''}"><b style="height:${v ? Math.max(18, v / max * 100) : 0}%"></b></i>`).join('')}</div></div></div>
+      <div class="tile pend"><img class="ico3d" src="assets/icons/pending-hourglass.png" alt="" width="256" height="256">
+        <div class="tile-val"><span class="num">${pending}</span></div>
+        <div class="tile-foot"><span class="tag">اليوم</span><div class="tile-label">مشروع جارٍ بانتظار تحديثك اليوم</div></div></div>
     </div>
     <div class="sec-head"><div><h3 class="h-md">مشاريعي</h3><div class="sec-sub">مرتبة حسب آخر تحديث</div></div></div>
     ${projects.length ? `<div class="chips" role="group" aria-label="تصفية حسب الحالة">${opts.map(([k, l, c]) => `<button type="button" class="chip" data-act="homeFilter" data-f="${k}" aria-pressed="${k === f}">${k === 'ALL' ? '' : `<i style="background:${STATUS[k].color}"></i>`}${l}<span class="c">${c}</span></button>`).join('')}</div>` : ''}
