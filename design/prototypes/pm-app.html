@@ -1,0 +1,1594 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Operation — Project Manager App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,400..900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+<!--
+  Digital Operation — Project Manager app (واجهة العميل / مدير المشروع). One connected, clickable, strictly read-only prototype.
+  Design system: "Ember Pill Mobile", shared with employee-app.html. Behaviour: BRD summary in AGENTS.md.
+  Static prototype, in-memory data only. Demo "today" is Monday 2026-11-02.
+-->
+<style>
+  :root{
+    --primary:#F37F46; --on-primary:#FFFFFF;
+    --surface:#FFFFFF; --surface-alt:#F2F2F7;
+    --on-surface:#000000; --muted:#6C6C70; --border:#E5E5EA;
+    --success:#34C759; --error:#FF3B30; --warning:#FF9500;
+    --blue:#007AFF; --indigo:#5856D6; --yellow:#F5C842;
+    --r-md:14px; --r-lg:16px; --r-xl:24px; --r-2xl:28px; --r-3xl:32px; --r-full:9999px;
+    --gutter:24px;
+    --font:"Nunito Sans","Cairo",system-ui,sans-serif;
+    --stage:#F6F6F8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--stage);color:var(--on-surface);font-family:var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+  button:disabled{cursor:default}
+  a{color:inherit;text-decoration:none}
+  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+  [hidden]{display:none!important}
+  iconify-icon{display:inline-block;width:1em;height:1em;font-size:24px;flex:none}
+  .latin{font-family:"Nunito Sans",sans-serif}
+  .num{font-family:"Nunito Sans",sans-serif;font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+  .muted{color:var(--muted)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ───────── Stage ───────── */
+  .stage{position:relative;min-height:100vh;padding:48px 24px 80px;overflow:hidden}
+  .stage-bg{position:absolute;top:0;left:0;width:100%;height:1100px;pointer-events:none}
+  .stage-bg path{fill:none;stroke:#E8E8ED;stroke-width:1.2}
+  .stage-bg path.idx{stroke:#DEDEE4;stroke-width:1.8}
+  .layout{position:relative;display:flex;gap:80px;justify-content:center;align-items:flex-start;max-width:1100px;margin:0 auto}
+  .side{width:330px;flex:none;position:sticky;top:32px}
+  .kicker-latin{font-family:"Nunito Sans";font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .stage-title{margin:10px 0 6px;font-family:"Nunito Sans";font-weight:900;font-size:clamp(38px,5vw,52px);line-height:.95;letter-spacing:-0.04em;direction:ltr;text-align:right}
+  .stage-title span{color:var(--primary)}
+  .stage-sub{margin:0 0 22px;font-size:14px;font-weight:600;color:var(--muted)}
+  .side-card{background:#fff;border-radius:var(--r-xl);padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .side-card h4{margin:0 0 10px;font-size:12px;font-weight:800;color:var(--muted)}
+  .side-card h4.disclosure{margin:0}
+  .disclosure button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0;padding:4px 0;font:inherit;color:inherit;text-align:start}
+  .disclosure iconify-icon{font-size:16px;transition:transform .25s ease}
+  .disclosure button[aria-expanded="true"] iconify-icon{transform:rotate(180deg)}
+  .collapse{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s ease}
+  .collapse.open{grid-template-rows:1fr}
+  .collapse > *{min-height:0;overflow:hidden}
+  .collapse .flow{padding-top:10px}
+  .side-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface-alt);border-radius:var(--r-full);padding:8px 14px;font-size:12px;font-weight:800;margin-top:10px}
+  .side-btn iconify-icon{font-size:16px}
+  .side-note{margin:10px 0 0;font-size:12px;font-weight:600;line-height:18px;color:var(--muted)}
+  .flow{display:flex;flex-direction:column;gap:2px}
+  .flow button{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:var(--r-full);font-size:13px;font-weight:700;color:var(--muted);text-align:start;transition:background .15s}
+  .flow button:hover{background:var(--surface-alt)}
+  .flow .n{font-family:"Nunito Sans";font-weight:900;font-size:12px;color:#C7C7CC;width:20px}
+  .flow button[aria-current="true"]{background:var(--surface-alt);color:#000}
+  .flow button[aria-current="true"] .n{color:var(--primary)}
+  .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;font-weight:700;cursor:pointer}
+  .switch input{appearance:none;width:40px;height:24px;border-radius:999px;background:#E5E5EA;position:relative;cursor:pointer;transition:background .2s;flex:none;margin:0}
+  .switch input::after{content:"";position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:right .2s}
+  .switch input:checked{background:var(--primary)}
+  .switch input:checked::after{right:18px}
+  .legend-row{display:flex;gap:6px;flex-wrap:wrap}
+
+  /* ───────── Device ───────── */
+  .phone{position:relative;width:390px;height:844px;border-radius:56px;background:var(--surface);overflow:hidden;isolation:isolate;flex:none;
+    box-shadow:0 0 0 10px #0B0B0C,0 0 0 11px #2C2C2E,0 50px 90px -30px rgba(0,0,0,.35),0 30px 70px -30px rgba(243,127,70,.25)}
+  .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:var(--r-full);background:#000;z-index:80}
+  .statusbar{position:absolute;top:0;left:0;right:0;height:54px;padding:0 30px 0 36px;display:flex;justify-content:space-between;align-items:center;z-index:75;font-family:"Nunito Sans";font-weight:800;font-size:16px;pointer-events:none;transition:color .2s}
+  .statusbar.light{color:#fff}
+  .statusbar svg{fill:currentColor}
+  .sb-icons{display:flex;gap:6px;align-items:center}
+  .home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:var(--r-full);background:#000;z-index:80;pointer-events:none}
+  .view{position:absolute;inset:0}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:#fff}
+  .screen::-webkit-scrollbar{display:none}
+  .screen.fwd{animation:inFwd .32s cubic-bezier(.2,.8,.2,1)}
+  .screen.bk{animation:inBack .32s cubic-bezier(.2,.8,.2,1)}
+  .screen.fade{animation:fadeIn .22s ease}
+  @keyframes inFwd{from{transform:translateX(-22%);opacity:0}}
+  @keyframes inBack{from{transform:translateX(22%);opacity:0}}
+  @keyframes fadeIn{from{opacity:0}}
+  @keyframes sheetUp{from{transform:translateY(100%)}}
+  .sb-bg{position:sticky;top:0;height:54px;margin-bottom:-54px;background:rgba(255,255,255,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:20}
+  .body{padding:64px var(--gutter) 48px}
+  .body.with-dock{padding-bottom:130px}
+  .body.with-tabs{padding-bottom:150px}
+
+  /* ───────── Components ───────── */
+  .kicker{font-size:12px;font-weight:800;color:var(--muted)}
+  .kicker-sm{font-size:12px;font-weight:700;color:var(--muted);line-height:18px}
+  .h-lg{margin:2px 0 4px;font-size:24px;font-weight:800;line-height:34px}
+  .h-md{font-size:18px;font-weight:800;line-height:26px;margin:0}
+  .lede{margin:0 0 20px;font-size:14px;font-weight:600;line-height:22px;color:var(--muted)}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .field label,.field .label{font-size:12px;font-weight:700;padding-inline-start:18px}
+  .req{color:#D70015}
+  .input{display:flex;align-items:center;gap:10px;background:var(--surface-alt);border-radius:var(--r-full);padding:0 18px;height:54px;transition:box-shadow .15s}
+  .input:focus-within{box-shadow:0 0 0 2px var(--primary)}
+  .input > iconify-icon{font-size:20px;color:var(--muted)}
+  .input input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:0;font-family:"Nunito Sans","Cairo";font-size:14px;font-weight:700;color:#000;text-align:right}
+  .input input::placeholder{color:#AEAEB2;font-weight:600}
+  .input.bad{box-shadow:0 0 0 2px rgba(255,59,48,.55)}
+  .input.locked .val{flex:1;font-size:14px;font-weight:800}
+  .eye{width:36px;height:36px;margin-inline-end:-10px;border-radius:var(--r-full);display:grid;place-items:center;color:var(--muted)}
+  .eye iconify-icon{font-size:20px}
+  .hint{font-size:12px;font-weight:600;line-height:18px;color:var(--muted);padding-inline-start:18px}
+  .hint.err{color:#D70015}
+  .msg{display:flex;gap:8px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-lg);font-size:12px;font-weight:700;line-height:19px;margin:2px 0 12px}
+  .msg iconify-icon{font-size:20px}
+  .msg-error{background:rgba(255,59,48,.08);color:#D70015}
+  .msg-warn{background:rgba(255,149,0,.10);color:#B25000}
+  .msg-info{background:var(--surface-alt);color:var(--muted)}
+  .msg-ok{background:rgba(52,199,89,.12);color:#248A3D}
+  .btn-primary{position:relative;margin-top:8px;width:100%;height:56px;border-radius:var(--r-full);background:var(--primary);color:#fff;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;
+    box-shadow:0 12px 30px -8px rgba(243,127,70,.45);transition:transform .15s}
+  .btn-primary:active{transform:scale(.97)}
+  .btn-primary iconify-icon{font-size:20px}
+  .btn-primary.sm{height:48px;font-size:13px;margin:0;flex:1}
+  .btn-primary .spin{display:none}
+  .btn-primary.loading > :not(.spin){display:none}
+  .btn-primary.loading .spin{display:block;width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .btn-sec,.btn-danger{flex:1;height:48px;border-radius:var(--r-full);background:var(--surface-alt);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .15s}
+  .btn-danger{background:rgba(255,59,48,.1);color:#D70015}
+  .btn-sec:active,.btn-danger:active{transform:scale(.97)}
+  .btn-row{display:flex;gap:8px;margin-top:14px}
+  .avatar{width:44px;height:44px;border-radius:var(--r-full);background:var(--surface-alt);display:grid;place-items:center;font-weight:800;font-size:17px;flex:none}
+  .avatar.sm{width:36px;height:36px;font-size:14px;background:#fff}
+  .avatar.xl{width:88px;height:88px;font-size:34px;margin:0 auto 14px}
+  .icon-btn{position:relative;width:40px;height:40px;border-radius:var(--r-full);background:var(--surface-alt);display:grid;place-items:center;flex:none;transition:transform .15s,opacity .15s}
+  .icon-btn:active{transform:scale(.92)}
+  .icon-btn:disabled{opacity:.35;transform:none}
+  .icon-btn.white{background:#fff}
+  .icon-btn.sm{width:36px;height:36px}
+  .icon-btn.sm iconify-icon{font-size:20px}
+  .badge{position:absolute;top:-2px;inset-inline-end:-2px;min-width:18px;height:18px;padding:0 5px;border-radius:var(--r-full);background:var(--primary);color:#fff;font-family:"Nunito Sans";font-size:10px;font-weight:900;display:grid;place-items:center;box-shadow:0 0 0 2px #fff}
+  .halo{width:44px;height:44px;border-radius:var(--r-full);background:#fff;display:grid;place-items:center;flex:none}
+  .halo.photo{background:#E7E2DC center/cover no-repeat}
+  .halo.photo iconify-icon{font-size:16px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))}
+  .pcover{display:block;height:140px;border-radius:18px;background:#E7E2DC center/cover no-repeat}
+  .pcover.lg{height:208px;border-radius:var(--r-3xl);margin-bottom:12px}
+  .halo iconify-icon{font-size:22px}
+  .tag{font-size:10px;font-weight:800;padding:3px 8px;border-radius:var(--r-full);background:#fff;color:var(--muted);white-space:nowrap}
+  .tag2{background:var(--surface-alt);padding:6px 12px;border-radius:var(--r-full);font-size:12px;font-weight:800}
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;margin:34px 0 14px}
+  .sec-sub{font-size:12px;font-weight:600;color:var(--muted);line-height:18px}
+  .text-btn{display:inline-flex;align-items:center;gap:2px;color:var(--primary);font-size:13px;font-weight:800}
+  .text-btn iconify-icon{font-size:18px}
+  .more-btn{display:flex;width:100%;justify-content:center;align-items:center;gap:6px;margin-top:12px;height:44px;border-radius:var(--r-full);background:var(--surface-alt);font-size:12px;font-weight:800}
+  .seg{display:flex;gap:2px;background:rgba(242,242,247,.7);padding:4px;border-radius:20px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:var(--r-md);font-size:12px;font-weight:600;color:var(--muted)}
+  .seg.fill button{flex:1}
+  .seg button[aria-pressed="true"]{background:#fff;color:#000;font-weight:800;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .seg .c{font-family:"Nunito Sans";font-size:11px;font-weight:900;opacity:.55}
+  .pip{display:inline-flex;align-items:center;flex:none;gap:6px;height:24px;padding:0 10px;border-radius:var(--r-full);font-size:11px;font-weight:800;line-height:16px;white-space:nowrap;transition:opacity .15s}
+  .pip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .pip-success{background:rgba(52,199,89,.12);color:#248A3D}
+  .pip-warning{background:rgba(255,149,0,.12);color:#B25000}
+  .pip-neutral{background:rgba(108,108,112,.12);color:#48484A}
+  .pip-blue{background:rgba(0,122,255,.10);color:#0062CC}
+  .pip.off{opacity:.35}
+  .pip.on-hero{background:#fff;box-shadow:0 6px 16px -8px rgba(0,0,0,.3)}
+  .card-head > .pip{align-self:flex-start}
+  .code{font-family:"Nunito Sans";font-size:11px;font-weight:800;letter-spacing:.06em;direction:ltr;unicode-bidi:isolate}
+  .dot{width:3px;height:3px;border-radius:50%;background:#C7C7CC;flex:none}
+  .chev{font-size:20px!important;color:rgba(108,108,112,.45)}
+  .chip-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;border-radius:var(--r-full);padding:7px 12px 7px 14px;font-size:12px;font-weight:800;transition:transform .15s;white-space:nowrap}
+  .chip-btn:active{transform:scale(.95)}
+  .chip-btn iconify-icon{font-size:18px;color:var(--primary)}
+  .chip-btn.pearl{background:var(--surface-alt)}
+  .link{display:inline-flex;align-items:center;gap:2px;font-size:12px;font-weight:700;white-space:nowrap}
+  .link iconify-icon{font-size:16px;color:var(--muted)}
+  .note{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:700;color:var(--muted)}
+  .note iconify-icon{font-size:16px}
+  .empty{background:var(--surface-alt);border-radius:var(--r-2xl);padding:32px 24px;text-align:center}
+  .empty .halo{margin:0 auto 14px;width:56px;height:56px}
+  .empty .halo iconify-icon{font-size:26px;color:#AEAEB2}
+  .empty strong{display:block;font-size:16px;font-weight:800;line-height:24px}
+  .empty p{margin:6px 0 0;font-size:12px;font-weight:600;line-height:20px;color:var(--muted)}
+  .stack{display:flex;flex-direction:column;gap:12px}
+  .panel{background:var(--surface-alt);border-radius:var(--r-2xl);padding:20px}
+  .panel h4{margin:0 0 8px;font-size:16px;font-weight:800;line-height:24px}
+  .panel p{margin:0;font-size:14px;font-weight:600;line-height:24px}
+  .panel.stack{gap:16px}
+
+  /* Login */
+  .art{position:relative;margin:8px 8px 0;height:330px;border-radius:48px;background:var(--surface-alt);overflow:hidden}
+  .art.photo{background-size:cover;background-position:center}
+  .art.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(242,242,247,.92) 0%,rgba(242,242,247,.45) 36%,rgba(242,242,247,.12) 62%,rgba(242,242,247,.8) 100%)}
+  .art.photo .contours path{stroke:rgba(255,255,255,.38)}
+  .art-svg{position:absolute;inset:0;width:100%;height:100%}
+  .art-svg .contours path{fill:none;stroke:#fff;stroke-width:1.3}
+  .art-svg .contours path.idx{stroke-width:2.4}
+  .art-svg .route{fill:none;stroke:#000;stroke-width:1.6;stroke-dasharray:1.5 6;stroke-linecap:round;opacity:.5}
+  .art-svg .core{fill:var(--primary)}
+  .art-svg .ring{fill:none;stroke:var(--primary);stroke-width:1.4;transform-box:fill-box;transform-origin:center;animation:ping 3.4s cubic-bezier(.2,.6,.3,1) infinite}
+  .art-svg .ring.r2{animation-delay:1.7s}
+  @keyframes ping{0%{transform:scale(.7);opacity:.8}100%{transform:scale(2.8);opacity:0}}
+  .art-top{position:absolute;top:62px;inset-inline:20px;display:flex;justify-content:space-between;align-items:center}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-name{font-family:"Nunito Sans";font-weight:900;font-size:15px;letter-spacing:-0.01em;line-height:1.1}
+  .brand-sub{font-size:11px;font-weight:700;color:var(--muted);line-height:1.3}
+  .glass-pill{background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:6px 12px;border-radius:var(--r-full);font-size:12px;font-weight:800}
+  .dev-fill{position:absolute;top:112px;inset-inline-end:20px;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px 0 4px;border-radius:var(--r-full);background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px dashed rgba(243,127,70,.75);font-size:12px;font-weight:800;transition:transform .15s}
+  .dev-fill:active{transform:scale(.96)}
+  .dev-fill iconify-icon{font-size:16px;color:var(--primary)}
+  .dev-fill .env{font-family:"Nunito Sans";font-size:10px;font-weight:900;letter-spacing:.08em;line-height:1;background:var(--primary);color:#fff;border-radius:var(--r-full);padding:5px 7px}
+  .art-foot{position:absolute;bottom:20px;inset-inline:24px;display:flex;justify-content:flex-end}
+  .coord{font-family:"Nunito Sans";font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);direction:ltr;unicode-bidi:isolate}
+  .login-form{padding:26px var(--gutter) 40px;display:flex;flex-direction:column}
+  .help{display:flex;gap:8px;align-items:flex-start;margin:18px 6px 0;font-size:12px;font-weight:600;line-height:19px;color:var(--muted)}
+  .help iconify-icon{font-size:18px;color:#AEAEB2}
+
+  /* Home */
+  .appbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .who{display:flex;align-items:center;gap:12px}
+  .hero{position:relative;overflow:hidden;background:var(--primary);color:#fff;border-radius:var(--r-3xl);padding:24px;box-shadow:0 10px 25px -5px rgba(243,127,70,.20)}
+  .hero-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .hero-art path{fill:none;stroke:rgba(255,255,255,.22);stroke-width:1.2}
+  .hero-art path.idx{stroke:rgba(255,255,255,.32);stroke-width:2}
+  .hero > :not(.hero-art){position:relative}
+  .hero-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .hero-label{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700;color:rgba(255,255,255,.88)}
+  .hero-label iconify-icon{font-size:20px}
+  .hero-num{display:flex;align-items:baseline;gap:12px;margin:22px 0 22px}
+  .hero-num .num{font-size:56px;line-height:1}
+  .hero-num .unit{font-size:14px;font-weight:700;opacity:.9}
+  .hero-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .hero-title{margin:14px 0 18px;font-size:24px;font-weight:800;line-height:34px}
+  .btn-white{background:#fff;color:#000;border-radius:var(--r-full);padding:10px 16px 10px 18px;font-size:13px;font-weight:800;display:inline-flex;gap:8px;align-items:center;box-shadow:0 10px 24px -10px rgba(0,0,0,.35);transition:transform .15s}
+  .btn-white:active{transform:scale(.96)}
+  .btn-white iconify-icon{font-size:18px;color:var(--primary)}
+  .badge-pill{background:rgba(255,255,255,.2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:6px 12px;border-radius:var(--r-full);font-size:12px;font-weight:700;display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+  .badge-pill iconify-icon{font-size:16px}
+  .dates{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+  .dates div{background:rgba(255,255,255,.16);border-radius:var(--r-lg);padding:10px 14px}
+  .dates span{display:block;font-size:12px;font-weight:700;opacity:.85}
+  .dates strong{font-size:14px;font-weight:800}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .tile{background:var(--surface-alt);border-radius:var(--r-2xl);padding:18px;display:flex;flex-direction:column;min-height:172px}
+  .tile-top{display:flex;justify-content:space-between;align-items:flex-start}
+  .tile .halo{width:40px;height:40px}
+  .tile-val{margin-top:auto}
+  .tile-val .num{font-size:26px;line-height:1;display:block}
+  .tile-label{font-size:12px;font-weight:700;color:var(--muted);line-height:18px;margin-top:6px}
+  .bars{display:flex;gap:4px;align-items:flex-end;height:34px;margin:14px 0 12px}
+  .bars i{flex:1;height:100%;background:#fff;border-radius:6px 6px 4px 4px;position:relative;overflow:hidden}
+  .bars i b{position:absolute;bottom:0;left:0;right:0;background:rgba(243,127,70,.4);border-radius:inherit}
+  .bars i.today b{background:var(--primary)}
+  .list{display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--surface-alt);border-radius:var(--r-2xl);padding:20px;display:flex;flex-direction:column;gap:16px;cursor:pointer;animation:rise .35s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}}
+  .card.static{cursor:default;animation:none}
+  .card-head{display:flex;gap:12px;align-items:flex-start}
+  .card-title{flex:1;min-width:0}
+  .card-title h3{margin:0;font-size:16px;font-weight:800;line-height:24px}
+  .card-meta{display:flex;gap:6px;align-items:center;margin-top:1px;font-size:12px;font-weight:600;color:var(--muted)}
+  .facts{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+  .facts span{display:flex;gap:6px;align-items:center}
+  .facts iconify-icon{font-size:15px;color:#AEAEB2}
+  .card-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:34px}
+  .post{background:var(--surface-alt);border-radius:var(--r-2xl);padding:18px 20px;display:flex;flex-direction:column;gap:12px;cursor:pointer;text-align:start;width:100%}
+  .post-head{display:flex;gap:10px;align-items:center}
+  .post-who{flex:1;min-width:0}
+  .post-who strong{display:block;font-size:14px;font-weight:800;line-height:20px}
+  .post-who span{font-size:11px;font-weight:700;color:var(--muted)}
+  .post-time{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .post p{margin:0;font-size:14px;font-weight:600;line-height:22px;unicode-bidi:plaintext}
+  .atts{display:flex;gap:6px;flex-wrap:wrap}
+  .att{display:inline-flex;gap:5px;align-items:center;background:#fff;border-radius:var(--r-full);padding:5px 10px;font-size:11px;font-weight:800}
+  .att iconify-icon{font-size:14px}
+
+  /* Sub-screens */
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .topbar .t{flex:1;min-width:0;text-align:center}
+  .topbar h2{margin:0;font-size:18px;font-weight:800;line-height:26px}
+  .topbar .k{font-size:12px;font-weight:700;color:var(--muted);line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .spacer{width:40px;flex:none}
+  .dock{position:absolute;left:0;right:0;bottom:0;z-index:25;padding:14px var(--gutter) 30px;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .dock .btn-primary{margin-top:0}
+  .loc{background:var(--surface-alt);border-radius:var(--r-2xl);padding:8px;margin-top:12px}
+  .loc-map{position:relative;height:150px;border-radius:22px;background:#fff;overflow:hidden}
+  .loc-map svg{position:absolute;inset:0;width:100%;height:100%}
+  .loc-map path{fill:none;stroke:#ECECF1;stroke-width:1.2}
+  .loc-map path.idx{stroke:#E2E2E8;stroke-width:2}
+  .loc-map .road{stroke:#F2F2F7;stroke-width:6;stroke-linecap:round}
+  .loc-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:#fff;box-shadow:0 6px 16px -4px rgba(0,0,0,.22);display:grid;place-items:center}
+  .loc-pin i{width:16px;height:16px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px rgba(243,127,70,.2)}
+  .loc-info{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 12px 10px}
+  .loc-info strong{display:block;font-size:14px;font-weight:800;line-height:20px}
+  .person{display:flex;align-items:center;gap:12px}
+  .person strong{display:block;font-size:14px;font-weight:800;line-height:20px}
+  .person span{font-size:12px;font-weight:600;color:var(--muted)}
+  .mini{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:start}
+  .mini-body{flex:1;min-width:0}
+  .mini-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .mini-top strong{font-size:14px;font-weight:800;line-height:20px}
+  .mini-top span{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .mini p{margin:2px 0 0;font-size:12px;font-weight:600;line-height:18px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mini .cnt{display:inline-flex;gap:3px;align-items:center;font-size:11px;font-weight:800;color:var(--muted)}
+  .mini .cnt iconify-icon{font-size:13px}
+  .lrow{display:flex;align-items:center;gap:14px;background:var(--surface-alt);border-radius:var(--r-2xl);padding:16px 20px;width:100%;text-align:start;margin-top:12px}
+  .lrow .grow{flex:1;min-width:0}
+  .lrow strong{display:block;font-size:16px;font-weight:800;line-height:22px}
+  .lrow span{font-size:12px;font-weight:600;color:var(--muted)}
+  .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .thumb{position:relative;aspect-ratio:1;border-radius:var(--r-lg);overflow:hidden;background:#E7E2DC;display:block}
+  .thumb svg{position:absolute;inset:0;width:100%;height:100%}
+  .thumb path{fill:none;stroke:rgba(255,255,255,.65);stroke-width:1.1}
+  .thumb.t2{background:#DEE2E7}.thumb.t3{background:#E4DACD}.thumb.t4{background:#DCE2DA}
+  .thumb.has-img{background-size:cover;background-position:center}
+  .thumb .ov{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-family:"Nunito Sans";font-weight:900;font-size:16px;background:rgba(0,0,0,.35)}
+  .thumb .play{position:absolute;inset:0;margin:auto;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;color:#000}
+  .thumb .play iconify-icon{font-size:16px}
+  .thumb-btn{display:block;border-radius:var(--r-lg);transition:transform .15s}
+  .thumb-btn:active{transform:scale(.96)}
+  .day-head{display:flex;justify-content:space-between;align-items:baseline;margin:22px 4px 10px;font-size:12px;font-weight:800;color:var(--muted)}
+  .day-head.first{margin-top:0}
+  .textarea{background:var(--surface-alt);border-radius:var(--r-xl);padding:16px 18px;transition:box-shadow .15s}
+  .textarea:focus-within{box-shadow:0 0 0 2px var(--primary)}
+  .textarea.bad{box-shadow:0 0 0 2px rgba(255,59,48,.55)}
+  .textarea textarea{display:block;width:100%;min-height:118px;border:0;background:transparent;outline:0;resize:none;font:600 14px/22px var(--font);color:#000}
+  .textarea textarea::placeholder{color:#AEAEB2}
+  .att-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .att-tile{position:relative;aspect-ratio:1;border-radius:20px;background:var(--surface-alt);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:800;color:var(--muted)}
+  .att-tile.thumb{background-color:#E7E2DC}
+  .att-tile.add{color:#000}
+  .att-tile.add iconify-icon{color:var(--primary);font-size:26px}
+  .att-tile .fname-s{font-family:"Nunito Sans","Cairo";font-size:10px;font-weight:800;color:#000;padding:0 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
+  .att-x{position:absolute;top:6px;inset-inline-end:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;z-index:2}
+  .att-x iconify-icon{font-size:14px}
+  .src-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .meta-grid div{background:var(--surface-alt);border-radius:20px;padding:12px 14px}
+  .meta-grid span{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+  .meta-grid strong{font-size:14px;font-weight:800}
+  .flist{display:flex;flex-direction:column;gap:8px}
+  .frow{display:flex;align-items:center;gap:12px;background:var(--surface-alt);border-radius:var(--r-xl);padding:12px 14px}
+  .frow .grow{flex:1;min-width:0}
+  .fname{display:block;font-size:14px;font-weight:800;line-height:20px;unicode-bidi:plaintext;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fmeta{display:flex;gap:6px;align-items:center;margin-top:2px;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden}
+  .fmeta .latin{font-weight:800;direction:ltr;unicode-bidi:isolate}
+
+  /* Map */
+  .map{position:absolute;inset:0;background:#EDEDF1}
+  .map > svg{position:absolute;inset:0;width:100%;height:100%}
+  .map .contours path{fill:none;stroke:#fff;stroke-width:1.2}
+  .map .contours path.idx{stroke-width:2.2}
+  .map .sea{fill:#E2E7EE}
+  .map .road{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;opacity:.9}
+  .pin{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 6px 14px -4px rgba(0,0,0,.28);display:grid;place-items:center;transition:transform .2s;z-index:3}
+  .pin i{width:12px;height:12px;border-radius:50%}
+  .pin.sel{transform:translate(-50%,-50%) scale(1.3);z-index:4}
+  .pin-label{position:absolute;transform:translate(-50%,calc(-100% - 26px));background:#000;color:#fff;font-size:12px;font-weight:800;padding:6px 12px;border-radius:var(--r-full);white-space:nowrap;z-index:5;pointer-events:none}
+  .map-top{position:absolute;top:60px;inset-inline:16px;z-index:6;display:flex;flex-direction:column;gap:8px;align-items:stretch}
+  .glass{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(229,229,234,.5);border-radius:var(--r-full);box-shadow:0 8px 30px rgba(0,0,0,.08)}
+  .map-title{display:flex;justify-content:space-between;align-items:center;padding:6px;padding-inline-start:18px}
+  .map-title strong{font-size:16px;font-weight:800}
+  .map-legend{display:flex;gap:4px;padding:5px;align-self:flex-start;flex-wrap:wrap}
+  .sheet{position:absolute;inset-inline:12px;bottom:110px;z-index:6;background:#fff;border-radius:var(--r-3xl);padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+  .grab{width:36px;height:5px;border-radius:9px;background:#E5E5EA;margin:-6px auto 12px}
+
+  /* Calendar */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
+  .cal-nav{display:flex;gap:6px;align-items:center}
+  .wk,.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .wk{margin-bottom:6px;font-size:11px;font-weight:800;color:var(--muted);text-align:center}
+  .d{position:relative;aspect-ratio:1;border-radius:var(--r-md);background:var(--surface-alt);display:grid;place-items:center;font-family:"Nunito Sans";font-size:13px;font-weight:800;color:#000;transition:box-shadow .15s}
+  .d.blank{background:transparent}
+  .d.rest{color:#AEAEB2}
+  .d.future{background:transparent;color:#D1D1D6}
+  .d.l1{background:rgba(243,127,70,.2)}
+  .d.l2{background:rgba(243,127,70,.4)}
+  .d.l3{background:var(--primary);color:#fff;box-shadow:0 4px 10px -4px rgba(243,127,70,.4)}
+  .d.today::after{content:"";position:absolute;bottom:5px;left:50%;margin-left:-2px;width:4px;height:4px;border-radius:50%;background:currentColor}
+  .d.sel{box-shadow:0 0 0 2px #fff,0 0 0 4px #000}
+  .cal-legend{display:flex;align-items:center;gap:5px;justify-content:flex-end;font-size:11px;font-weight:700;color:var(--muted);margin-top:14px}
+  .cal-legend i{width:14px;height:14px;border-radius:5px;background:var(--surface-alt)}
+
+  /* Notifications */
+  .ngroup{font-size:12px;font-weight:800;color:var(--muted);margin:20px 6px 8px}
+  .ngroup.first{margin-top:4px}
+  .nrow{position:relative;display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:var(--r-xl);width:100%;text-align:start;margin-bottom:6px;transition:background .2s}
+  .nrow.unread{background:var(--surface-alt)}
+  .nrow .halo{width:40px;height:40px;background:var(--surface-alt)}
+  .nrow.unread .halo{background:#fff}
+  .nbody{flex:1;min-width:0;display:block}
+  .nbody strong{display:block;font-size:14px;font-weight:800;line-height:20px;padding-inline-end:14px}
+  .nbody .nt{display:block;margin:2px 0 6px;font-size:12px;font-weight:600;color:var(--muted);line-height:18px}
+  .nfoot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .ntime{font-size:11px;font-weight:700;color:#AEAEB2}
+  .nolink{display:inline-flex;gap:4px;align-items:center;font-size:11px;font-weight:700;color:#AEAEB2}
+  .nolink iconify-icon{font-size:14px}
+  .ndot{position:absolute;top:22px;inset-inline-end:16px;width:8px;height:8px;border-radius:50%;background:var(--primary)}
+
+  /* Profile */
+  .prof{text-align:center;margin:8px 0 26px}
+  .prof h2{font-size:24px;font-weight:800;line-height:34px;margin:0}
+  .prof .sub{font-size:14px;font-weight:600;color:var(--muted)}
+  .prof .chips{display:flex;gap:6px;justify-content:center;margin-top:12px}
+  .group-label{font-size:12px;font-weight:800;color:var(--muted);margin:22px 18px 8px}
+  .gcard{background:var(--surface-alt);border-radius:var(--r-2xl);padding:6px 0}
+  .grow-row{display:flex;align-items:center;gap:12px;padding:12px 18px;width:100%;text-align:start}
+  .grow-row .halo{width:38px;height:38px}
+  .grow-row .halo iconify-icon{font-size:20px}
+  .kv{flex:1;min-width:0}
+  .kv span{display:block;font-size:12px;font-weight:700;color:var(--muted);line-height:18px}
+  .kv strong{display:block;font-size:14px;font-weight:800;line-height:20px;unicode-bidi:plaintext;text-align:right}
+  .grow-row .act{font-size:12px;font-weight:800;color:var(--muted);display:inline-flex;align-items:center;gap:2px}
+  .danger{color:#D70015}
+  .foot-note{text-align:center;font-size:11px;font-weight:700;color:#AEAEB2;margin-top:22px}
+
+  /* Overlays */
+  .tabbar{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:90%;z-index:30;display:flex;padding:6px;
+    background:rgba(255,255,255,.9);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(229,229,234,.5);border-radius:var(--r-full);box-shadow:0 8px 30px rgba(0,0,0,.12)}
+  .tab{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0 9px;border-radius:var(--r-full);color:var(--muted);font-size:11px;font-weight:700;transition:transform .15s}
+  .tab:active{transform:scale(.95)}
+  .tab.active{background:var(--surface-alt);color:var(--primary);box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
+  .tab.active::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(243,127,70,.10)}
+  .tab iconify-icon,.tab span{position:relative}
+  .ov{position:absolute;inset:0;z-index:60}
+  .ov-bg{position:absolute;inset:0;background:rgba(0,0,0,.28);animation:fadeIn .2s}
+  .ov-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:32px 32px 0 0;padding:18px var(--gutter) 38px;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);max-height:80%;overflow:auto}
+  .ov-sheet .h-md{margin-bottom:4px}
+  .pv{position:absolute;inset:0;z-index:65;background:rgba(10,10,12,.95);display:flex;flex-direction:column;color:#fff;animation:fadeIn .2s}
+  .pv-top{display:flex;align-items:center;gap:12px;padding:60px 20px 14px}
+  .pv-top .icon-btn{background:rgba(255,255,255,.14);color:#fff}
+  .pv-name{flex:1;min-width:0}
+  .pv-name strong{display:block;font-size:14px;font-weight:800;unicode-bidi:plaintext;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pv-name span{font-size:11px;font-weight:700;opacity:.6}
+  .pv-body{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 20px 48px;min-height:0}
+  .pv-body img,.pv-body video{max-width:100%;max-height:100%;border-radius:20px;display:block}
+  .pv-body iframe{width:100%;height:100%;border:0;border-radius:16px;background:#fff}
+  .pv-art{width:100%;aspect-ratio:4/5;border-radius:28px}
+  .pv-cap{position:absolute;bottom:44px;left:0;right:0;text-align:center;font-size:12px;font-weight:700;opacity:.6}
+  .pdf-page{width:84%;aspect-ratio:1/1.414;background:#fff;border-radius:12px;padding:28px 22px;display:flex;flex-direction:column;gap:10px}
+  .pdf-page i{height:8px;border-radius:4px;background:#E5E5EA}
+  .pdf-page i.h{height:14px;width:60%;background:#D1D1D6;margin-bottom:8px}
+  .toast{position:absolute;top:58px;left:50%;transform:translate(-50%,-12px);z-index:90;background:#000;color:#fff;border-radius:var(--r-full);padding:10px 16px;font-size:12px;font-weight:800;display:flex;gap:8px;align-items:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:88%}
+  .toast span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast iconify-icon{font-size:18px;color:var(--primary)}
+
+  @media (max-width:860px){
+    .layout{flex-direction:column;align-items:center;gap:40px}
+    .side{position:static;width:100%;max-width:390px}
+  }
+  @media (max-width:460px){
+    .stage{padding:32px 16px 64px}
+    .phone{width:100%;max-width:390px;height:820px;border-radius:48px;box-shadow:0 0 0 6px #0B0B0C,0 40px 70px -30px rgba(0,0,0,.35)}
+    .art{border-radius:40px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .art-svg .ring,.card,.screen.fwd,.screen.bk,.screen.fade,.ov-sheet{animation:none}
+  }
+
+  /* ───────── Project Manager additions ───────── */
+  .side-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+  .side-list li{display:flex;gap:8px;align-items:flex-start;font-size:12px;font-weight:700;line-height:18px}
+  .side-list iconify-icon{font-size:16px;color:var(--primary);margin-top:1px}
+  .rsec{background:var(--surface-alt);border-radius:var(--r-2xl);padding:18px 20px;margin-top:12px}
+  .rsec h4{margin:0;font-size:16px;font-weight:800;line-height:24px}
+  .rsec > .sec-sub{margin:0 0 14px}
+  .sbar{display:flex;gap:3px;height:12px;border-radius:var(--r-full);overflow:hidden;background:#fff}
+  .sbar i{display:block;height:100%}
+  .slegend{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:14px}
+  .slegend span{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--muted)}
+  .slegend span i{width:8px;height:8px;border-radius:50%;flex:none}
+  .slegend b{margin-inline-start:auto;font-family:"Nunito Sans";font-size:14px;font-weight:900;color:#000}
+  .cls-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,0,0,.05)}
+  .hrow{display:grid;grid-template-columns:96px 1fr 40px;align-items:center;gap:10px;padding:5px 0}
+  .hrow .l{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hrow .tr{height:10px;border-radius:var(--r-full);background:#fff;overflow:hidden}
+  .hrow .tr b{display:block;height:100%;border-radius:inherit;background:var(--primary)}
+  .hrow .tr b.warn{background:var(--warning)}
+  .hrow .v{font-family:"Nunito Sans";font-size:13px;font-weight:900;text-align:left;direction:ltr}
+  .erow{display:flex;align-items:center;gap:12px;padding:10px 0}
+  .erow + .erow{border-top:1px solid rgba(0,0,0,.05)}
+  .erow .grow{flex:1;min-width:0}
+  .erow strong{display:block;font-size:14px;font-weight:800;line-height:20px}
+  .erow .grow span{font-size:12px;font-weight:600;color:var(--muted)}
+  .ecount{text-align:center;min-width:46px}
+  .ecount b{display:block;font-family:"Nunito Sans";font-size:16px;font-weight:900;line-height:20px}
+  .ecount span{font-size:11px;font-weight:700;color:var(--muted)}
+  .tl-item{position:relative;display:flex;gap:12px;padding-bottom:16px;width:100%;text-align:start}
+  .tl-item::before{content:"";position:absolute;top:44px;bottom:2px;inset-inline-start:19px;width:2px;border-radius:2px;background:var(--surface-alt)}
+  .tl-item:last-child::before{display:none}
+  .tl-item .halo{width:40px;height:40px;background:var(--surface-alt)}
+  .tl-item .halo iconify-icon{font-size:20px}
+  .tl-body{flex:1;min-width:0;padding-top:1px}
+  .tl-body strong{display:block;font-size:14px;font-weight:800;line-height:20px}
+  .tl-body p{margin:2px 0 4px;font-size:12px;font-weight:600;line-height:18px;color:var(--muted);unicode-bidi:plaintext;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tl-meta{display:flex;gap:6px;align-items:center;font-size:11px;font-weight:700;color:#AEAEB2}
+  .susp{display:flex;gap:12px;align-items:flex-start;background:rgba(255,149,0,.10);border-radius:var(--r-2xl);padding:16px 18px;margin-top:12px}
+  .susp .halo{background:#fff}
+  .susp strong{display:block;font-size:14px;font-weight:800;line-height:20px;color:#B25000}
+  .susp p{margin:4px 0 6px;font-size:14px;font-weight:600;line-height:22px}
+  .susp .m{font-size:11px;font-weight:700;color:#B25000;opacity:.85}
+</style>
+</head>
+<body>
+<main class="stage">
+  <svg class="stage-bg" viewBox="0 0 1440 1100" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+    <g data-contours='{"cx":1180,"cy":180,"n":24,"r0":30,"gap":38,"amp":0.16,"seed":0.4,"dx":-6,"dy":5}'></g>
+  </svg>
+
+  <div class="layout">
+    <aside class="side" aria-label="دليل النموذج">
+      <div class="kicker-latin">Interactive prototype · Ember Pill · v0.2</div>
+      <h1 class="stage-title">Digital Operation<span>.</span></h1>
+      <p class="stage-sub">تطبيق مدير المشروع — عرض فقط، تجربة متصلة وقابلة للنقر بالكامل</p>
+
+      <div class="side-card">
+        <h4>وضع التشغيل</h4>
+        <div class="seg fill" id="envSeg" role="group" aria-label="وضع التشغيل" style="margin-bottom:0">
+          <button type="button" data-env="development">تطوير</button><button type="button" data-env="testing">اختبار</button><button type="button" data-env="production">إنتاج</button>
+        </div>
+        <p class="side-note">زر «تعبئة بيانات تجريبية» يظهر في شاشة الدخول في وضعي التطوير والاختبار فقط، ولا يُضاف إلى الشاشة إطلاقًا في وضع الإنتاج.</p>
+      </div>
+
+      <div class="side-card">
+        <h4 class="disclosure"><button type="button" id="flowToggle" aria-expanded="false" aria-controls="flowBody">الانتقال السريع إلى شاشة<iconify-icon icon="solar:alt-arrow-down-linear" aria-hidden="true"></iconify-icon></button></h4>
+        <div class="collapse" id="flowBody" inert><div><nav class="flow" id="flow" aria-label="الانتقال السريع إلى شاشة"></nav></div></div>
+      </div>
+
+      <div class="side-card">
+        <h4>صلاحيات مدير المشروع</h4>
+        <ul class="side-list">
+          <li><iconify-icon icon="solar:eye-bold"></iconify-icon>عرض المشاريع المسندة فقط، للقراءة دون أي إضافة أو تعديل أو حذف.</li>
+          <li><iconify-icon icon="solar:download-minimalistic-bold"></iconify-icon>معاينة الملفات وتنزيلها.</li>
+          <li><iconify-icon icon="solar:chart-2-bold"></iconify-icon>تقارير وسجل نشاط للعرض فقط، دون تصدير.</li>
+          <li><iconify-icon icon="solar:eye-closed-bold"></iconify-icon>التحديثات المخفية من الإدارة لا تظهر في أي مكان.</li>
+        </ul>
+      </div>
+
+      <div class="side-card">
+        <label class="switch">محاكاة: لا توجد مشاريع مسندة<input type="checkbox" id="noProjects"></label>
+        <button class="side-btn" type="button" id="resetDemo"><iconify-icon icon="solar:refresh-bold"></iconify-icon>إعادة ضبط النموذج</button>
+      </div>
+
+      <div class="side-card">
+        <h4>ألوان حالات المشروع (مقترحة)</h4>
+        <div class="legend-row">
+          <span class="pip pip-blue">لم يبدأ</span><span class="pip pip-success">جارٍ التنفيذ</span><span class="pip pip-neutral">انتهت المدة</span><span class="pip pip-warning">معلق مؤقتًا</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="phone" id="phone">
+      <div class="island"></div>
+      <div class="statusbar" id="statusbar" dir="ltr"></div>
+      <div class="view" id="view"></div>
+      <nav class="tabbar" id="tabbar" aria-label="التنقل الرئيسي" hidden></nav>
+      <div id="overlay"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ═════════════════════ Helpers ═════════════════════ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+const WD = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const parse = s => new Date(s + 'T00:00:00');
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const fmtDate = s => { const d = parse(s); return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtDay = s => { const d = parse(s); return `${WD[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+const fmtTime = d => { let h = d.getHours(); const m = d.getMinutes(), ap = h < 12 ? 'ص' : 'م'; h = h % 12 || 12; return `${h}:${String(m).padStart(2, '0')} ${ap}`; };
+// Arabic counted nouns: 0 / 1 / 2 / 3–10 / 11+
+const countAr = (n, zero, one, two, few, many) => n === 0 ? zero : n === 1 ? one : n === 2 ? two : n <= 10 ? `${n} ${few}` : `${n} ${many}`;
+const nUpdates = n => countAr(n, 'لا توجد تحديثات', 'تحديث واحد', 'تحديثان', 'تحديثات', 'تحديثًا');
+const nFiles = n => countAr(n, 'لا توجد ملفات', 'ملف واحد', 'ملفان', 'ملفات', 'ملفًا');
+const nAtts = n => countAr(n, 'بلا مرفقات', 'مرفق واحد', 'مرفقان', 'مرفقات', 'مرفقًا');
+
+/* App mode — the demo-fill shortcut exists only outside production. Set with ?env=… or the side-panel switch. */
+const ENVS = { development: 'DEV', testing: 'TEST', production: 'PROD' };
+let ENV = (() => { const q = new URLSearchParams(location.search).get('env'); return q in ENVS ? q : 'development'; })();
+const isDev = () => ENV !== 'production';
+
+const TODAY = '2026-11-02';
+const NOW0 = new Date('2026-11-02T11:07:00'), LOADED = Date.now();
+const now = () => new Date(NOW0.getTime() + (Date.now() - LOADED));
+function rel(d) {
+  const mins = (now() - d) / 60000, days = Math.round((parse(TODAY) - parse(iso(d))) / 864e5);
+  if (days === 0) {
+    if (mins < 1) return 'الآن';
+    if (mins < 60) return 'منذ ' + countAr(Math.round(mins), '', 'دقيقة', 'دقيقتين', 'دقائق', 'دقيقة');
+    return 'منذ ' + countAr(Math.round(mins / 60), '', 'ساعة', 'ساعتين', 'ساعات', 'ساعة');
+  }
+  if (days === 1) return 'أمس';
+  if (days < 7) return 'منذ ' + countAr(days, '', 'يوم', 'يومين', 'أيام', 'يومًا');
+  if (days < 14) return 'منذ أسبوع';
+  if (days < 21) return 'منذ أسبوعين';
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+}
+function rng(seed) { return () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* Topographic contours */
+function contourPath(cx, cy, r, seed, amp, pts = 56) {
+  const P = [];
+  for (let i = 0; i < pts; i++) {
+    const t = i / pts * Math.PI * 2;
+    const k = 1 + amp * (0.55 * Math.sin(3 * t + seed) + 0.3 * Math.sin(5 * t + seed * 1.7) + 0.4 * Math.sin(2 * t - seed * 0.6));
+    P.push([cx + Math.cos(t) * r * k, cy + Math.sin(t) * r * k * 0.82]);
+  }
+  const f = v => v.toFixed(1);
+  let d = `M${f(P[0][0])},${f(P[0][1])}`;
+  for (let i = 0; i < pts; i++) {
+    const p0 = P[(i - 1 + pts) % pts], p1 = P[i], p2 = P[(i + 1) % pts], p3 = P[(i + 2) % pts];
+    d += `C${f(p1[0] + (p2[0] - p0[0]) / 6)},${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)},${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])},${f(p2[1])}`;
+  }
+  return d + 'Z';
+}
+function decorate(root = document) {
+  root.querySelectorAll('.thumb:not(.has-img):not([data-art])').forEach(t => {
+    const i = +(t.dataset.seed || Math.floor(Math.random() * 999));
+    t.dataset.art = '';
+    t.insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g data-contours='{"cx":${30 + (i * 37) % 50},"cy":${25 + (i * 23) % 55},"n":9,"r0":5,"gap":9,"amp":0.2,"seed":${(i * 1.37 % 7).toFixed(2)},"dx":1,"dy":0.6}'></g></svg>`);
+  });
+  root.querySelectorAll('[data-contours]:empty').forEach(g => {
+    const o = JSON.parse(g.dataset.contours);
+    let html = '';
+    for (let k = 0; k < o.n; k++) {
+      const amp = o.amp * (0.3 + 0.7 * k / o.n);
+      html += `<path class="${k % 4 === 3 ? 'idx' : ''}" d="${contourPath(o.cx + k * (o.dx || 0), o.cy + k * (o.dy || 0), o.r0 + k * o.gap, o.seed + k * 0.22, amp)}"/>`;
+    }
+    g.innerHTML = html;
+  });
+}
+
+
+/* ═════════════════════ Data ═════════════════════ */
+// Signed-in user: a Project Manager — the BRD's "client" interface. Strictly read-only; no role can widen it.
+const USERS = {
+  me:       { name: 'محمد العتيبي', first: 'محمد', i: 'م', role: 'مدير المشروع', email: 'mohammed.o@company.sa' },
+  ahmed:    { name: 'أحمد الزهراني', i: 'أ', role: 'مراقب موقع', email: 'ahmed.z@company.sa' },
+  sara:     { name: 'سارة القحطاني', i: 'س', role: 'مهندسة مساحة', email: 'sara.q@company.sa' },
+  khalid:   { name: 'خالد الشهري', i: 'خ', role: 'فني ترميم', email: 'khalid.s@company.sa' },
+  faisal:   { name: 'فيصل الحربي', i: 'ف', role: 'مهندس موقع', email: 'faisal.h@company.sa' },
+  noura:    { name: 'نورة الدوسري', i: 'ن', role: 'مسؤولة النظام', email: 'noura.d@company.sa' },
+  reem:     { name: 'ريم السبيعي', i: 'ر', role: 'مديرة المشروع', email: 'reem.s@company.sa' },
+  abdullah: { name: 'عبدالله المالكي', i: 'ع', role: 'مدير المشروع', email: 'abdullah.m@company.sa' },
+};
+const DEACTIVATED = ['majed.o@company.sa'];
+const ALERT_DAYS = 60;   // "End date approaching" period — configured by admins in Settings.
+
+const STATUS = {
+  IN_PROGRESS: { label: 'جارٍ التنفيذ', short: 'جارٍ',    cls: 'pip-success', color: '#34C759' },
+  ON_HOLD:     { label: 'معلق مؤقتًا',  short: 'معلق',    cls: 'pip-warning', color: '#FF9500' },
+  ENDED:       { label: 'انتهت المدة',  short: 'منتهية',  cls: 'pip-neutral', color: '#8E8E93' },
+  NOT_STARTED: { label: 'لم يبدأ',      short: 'لم يبدأ', cls: 'pip-blue',    color: '#007AFF' },
+};
+// Single status function (AGENTS.md): dates decide, unless manually on hold.
+function computeStatus(p, today = TODAY) {
+  if (p.onHold) return 'ON_HOLD';
+  if (today < p.start) return 'NOT_STARTED';
+  if (today > p.end) return 'ENDED';
+  return 'IN_PROGRESS';
+}
+
+// Site photos generated with Magnific (assets/photos): one cover per project plus work-in-progress shots.
+const PHOTO = n => `assets/photos/${n}.jpg`;
+// holds = suspension records (admin, mandatory reason); ext = end-date changes. Both appear in project details and the activity log.
+const PROJECTS = [
+  { code: 'PRJ-0142', name: 'ترميم قصر المصمك', short: 'قصر المصمك', cls: 'ترميم', loc: 'الرياض · حي الديرة', lat: 24.6312, lng: 46.7133,
+    photo: PHOTO('masmak-cover'), shots: ['masmak-plaster', 'masmak-scaffold', 'masmak-ceiling'].map(PHOTO),
+    start: '2026-09-15', end: '2027-01-12', team: ['ahmed', 'khalid', 'sara'], pms: ['me'], x: 75, y: 50,
+    ext: [{ at: '2026-10-22T11:30', from: '2026-12-15', to: '2027-01-12' }],
+    desc: 'ترميم شامل للواجهات الطينية والأبراج الدفاعية، يشمل معالجة الشقوق وإعادة تأهيل الأسقف الخشبية وفق معايير الحفاظ على التراث.' },
+  { code: 'PRJ-0138', name: 'مسح طبوغرافي لوادي حنيفة', short: 'وادي حنيفة', cls: 'مساحة', loc: 'الرياض · وادي حنيفة', lat: 24.6906, lng: 46.5820,
+    photo: PHOTO('wadi-cover'), shots: ['wadi-station', 'wadi-gnss', 'wadi-drone'].map(PHOTO),
+    start: '2026-10-01', end: '2026-12-20', team: ['ahmed', 'sara'], pms: ['me', 'reem'], x: 64, y: 55,
+    holds: [{ at: '2026-10-26T09:00', from: '2026-10-26', to: '2026-11-02', resumedAt: '2026-11-02T07:02', reason: 'ارتفاع منسوب المياه في مجرى الوادي بعد الأمطار.' }],
+    desc: 'رفع طبوغرافي تفصيلي لمجرى الوادي وضفافه لدعم أعمال التأهيل البيئي وتحديد مناسيب التصريف.' },
+  { code: 'PRJ-0127', name: 'توثيق موقع الحِجر الأثري', short: 'الحِجر', cls: 'تراثي وأثري', loc: 'العُلا · الحِجر', lat: 26.7920, lng: 37.9531,
+    photo: PHOTO('hegra-cover'), shots: ['hegra-inscription', 'hegra-scanner', 'hegra-excavation'].map(PHOTO),
+    start: '2026-06-01', end: '2026-12-31', onHold: true, team: ['ahmed', 'faisal'], pms: ['me', 'reem'], x: 30, y: 25,
+    holds: [{ at: '2026-10-18T15:10', from: '2026-10-18', reason: 'بانتظار تجديد تصريح العمل الميداني من هيئة التراث.' }],
+    desc: 'توثيق رقمي شامل للمدافن النبطية والنقوش الصخرية باستخدام المسح التصويري والليزري.' },
+  { code: 'PRJ-0119', name: 'إنشاء مبنى إداري', short: 'المبنى الإداري', cls: 'بناء', loc: 'جدة · حي الشاطئ', lat: 21.5810, lng: 39.1093,
+    photo: PHOTO('jeddah-cover'), shots: ['jeddah-concrete', 'jeddah-rebar', 'jeddah-facade'].map(PHOTO),
+    start: '2026-03-01', end: '2026-10-30', team: ['ahmed', 'faisal'], pms: ['me', 'abdullah'], x: 20, y: 47,
+    desc: 'إنشاء مبنى إداري من خمسة أدوار يشمل الأعمال الإنشائية والمعمارية والتمديدات الكهروميكانيكية.' },
+  { code: 'PRJ-0151', name: 'مسح مواقع الدرعية التاريخية', short: 'الدرعية', cls: 'مساحة', loc: 'الدرعية · حي الطريف', lat: 24.7340, lng: 46.5730,
+    photo: PHOTO('diriyah-cover'), shots: [],
+    start: '2026-11-15', end: '2027-03-15', team: ['ahmed', 'sara'], pms: ['me'], x: 60, y: 38,
+    desc: 'مسح وتوثيق المواقع التاريخية في حي الطريف تمهيدًا لأعمال التطوير والترميم.' },
+];
+const inHold = (p, d) => (p.holds || []).some(h => d >= h.from && (!h.to || d < h.to));
+const holdOf = p => p.onHold ? p.holds[p.holds.length - 1] : null;
+const FT = {
+  img:   { icon: 'solar:gallery-bold', tint: 'var(--indigo)', label: 'صورة', preview: true },
+  video: { icon: 'solar:videocamera-record-bold', tint: 'var(--blue)', label: 'فيديو', preview: true },
+  pdf:   { icon: 'solar:file-text-bold', tint: 'var(--error)', label: 'PDF', preview: true },
+  dwg:   { icon: 'solar:layers-bold', tint: 'var(--success)', label: 'DWG', preview: false },
+  kmz:   { icon: 'solar:map-point-bold', tint: 'var(--success)', label: 'KMZ', preview: false },
+  '3d':  { icon: 'solar:box-bold', tint: 'var(--warning)', label: '3D', preview: false },
+};
+const ENG = ['dwg', 'kmz', '3d'];
+const sizeStr = b => b < 1e6 ? `${Math.max(1, Math.round(b / 1000))} KB` : `${(b / 1e6).toFixed(1)} MB`;
+
+let S;
+function initialState() {
+  return {
+    authed: false, email: USERS.me.email, password: '12345678',
+    stack: [{ name: 'login', params: {} }],
+    noProjects: false, homeFilter: 'ALL', mapSel: 'PRJ-0142', mapHide: [], cal: { y: 2026, m: 11, d: 2 },
+    rep: { period: '30', p: 'ALL' },
+    updates: [], atts: {}, direct: [], notes: [],
+  };
+}
+
+// Seeded history of daily updates so lists, calendar, files, reports and counts all agree.
+const PHRASES = {
+  'ترميم': ['معالجة الشقوق في الجدار الشمالي بالمونة الجيرية التقليدية.', 'توثيق حالة الأسقف الخشبية قبل أعمال التأهيل.', 'تنظيف الزخارف الجصية في المجلس الرئيسي.', 'استكمال أعمال اللياسة الطينية للبرج الغربي.', 'فحص الرطوبة في الأساسات وتسجيل القراءات.', 'استبدال العوارض الخشبية المتضررة في الرواق.'],
+  'مساحة': ['رفع النقاط المرجعية للقطاع الأوسط.', 'تثبيت علامات المسح على الضفة الشرقية.', 'مطابقة القراءات الميدانية مع المخطط العام.', 'مسح بالطائرة المسيّرة للمنطقة الجنوبية.', 'معالجة بيانات الرفع وتصدير ملف الحدود.'],
+  'تراثي وأثري': ['توثيق النقوش في الواجهة الشمالية للمدفن.', 'تصوير فوتوغرامتري للمدفن رقم 7.', 'تسجيل إحداثيات اللقى السطحية في القطاع B.', 'تنظيف دقيق لمدخل المدفن وتوثيقه.', 'مسح ليزري للواجهة الصخرية الشرقية.'],
+  'بناء': ['صب خرسانة سقف الدور الثاني.', 'تركيب حديد التسليح لأعمدة الدور الثالث.', 'أعمال العزل المائي للسطح.', 'تركيب واجهات الألمنيوم في الجهة الغربية.', 'استلام أعمال التمديدات الكهربائية للدور الأول.'],
+};
+function buildData() {
+  const R = rng(2026);
+  let aid = 0, uid = 0;
+  const att = (t, name, size, extra = {}) => { const a = { id: 'a' + (++aid), t, name, size, ...extra }; S.atts[a.id] = a; return a; };
+  const rsize = t => { const mb = { img: 1.5 + R() * 3, video: 20 + R() * 60, pdf: 0.4 + R() * 3, '3d': 60 + R() * 120, dwg: 2 + R() * 9, kmz: 0.2 + R() * 0.9 }[t]; return sizeStr(mb * 1e6); };
+  const ratt = t => att(t, t === 'img' ? `IMG_${4000 + Math.floor(R() * 5000)}.jpg` : t === 'video' ? `VID_${100 + Math.floor(R() * 800)}.mp4`
+    : `${{ pdf: 'report', dwg: 'detail', kmz: 'points', '3d': 'scan' }[t]}-${10 + Math.floor(R() * 89)}.${t === '3d' ? 'obj' : t}`, rsize(t));
+  const upd = (p, author, date, hm, text, atts, extra = {}) => {
+    const [h, m] = hm.split(':').map(Number);
+    const at = parse(date); at.setHours(h, m);
+    S.updates.push({ id: 'u' + (++uid), p, author, date, at, text, atts: atts.map(a => a.id), ...extra });
+  };
+
+  // Hand-written recent history (matches the employee app).
+  upd('PRJ-0142', 'ahmed', '2026-11-02', '10:42', 'الانتهاء من تنظيف الواجهة الشرقية ومعالجة الشقوق السطحية في البرج الجنوبي.',
+    [ratt('img'), ratt('video'), ratt('img'), ratt('img'), att('pdf', 'تقرير-الواجهة-الشرقية.pdf', '1.8 MB'), att('kmz', 'south-tower-points.kmz', '420 KB')]);
+  upd('PRJ-0142', 'khalid', '2026-11-02', '08:15', 'تجهيز خلطة الطين التقليدية لأعمال اللياسة في الجدار الشمالي.', [ratt('img'), ratt('img')]);
+  upd('PRJ-0138', 'sara', '2026-11-02', '08:07', 'رفع النقاط المرجعية للقطاع الشمالي ومطابقتها مع المخطط العام.', [att('kmz', 'north-sector.kmz', '780 KB'), ratt('img'), ratt('img'), ratt('img'), ratt('img')]);
+  upd('PRJ-0142', 'ahmed', '2026-11-01', '14:30', 'تركيب السقالات حول البرج الجنوبي وتوثيق حالته قبل المعالجة.', [ratt('img'), ratt('img'), ratt('img'), ratt('img')]);
+  upd('PRJ-0142', 'sara', '2026-11-01', '11:05', 'رفع مساحي ثلاثي الأبعاد للواجهة الشرقية ومطابقته مع المخطط.', [att('3d', 'east-facade-scan.obj', '126 MB'), att('dwg', 'east-facade.dwg', '6.2 MB')]);
+  upd('PRJ-0142', 'ahmed', '2026-10-29', '09:20', 'معالجة أولية للأسقف الخشبية في المجلس الرئيسي.', [ratt('img'), ratt('img'), ratt('img')]);
+  // Admins may back-date updates; the real author is always kept.
+  upd('PRJ-0142', 'noura', '2026-10-29', '08:00', 'زيارة ميدانية من الإدارة واعتماد خطة العمل للأسبوعين القادمين.', []);
+  // Hidden by an admin (soft delete with a reason): never shown to project managers — lists, calendar, counts, files, reports, log.
+  upd('PRJ-0142', 'khalid', '2026-10-28', '16:40', 'صور مكررة أُرسلت بالخطأ.', [ratt('img')], { hidden: true, hiddenReason: 'تحديث مكرر' });
+
+  PROJECTS.forEach(p => {
+    const last = [p.end, '2026-10-31'].sort()[0];
+    for (let d = p.start; d <= last; d = addDays(d, 1)) {
+      const wd = parse(d).getDay();
+      if (wd === 5 || wd === 6 || inHold(p, d)) continue;   // Fri/Sat weekend, or suspended
+      if (p.code === 'PRJ-0142' && d === '2026-10-29') continue;
+      const r = R(), n = r < 0.3 ? 0 : r < 0.7 ? 1 : r < 0.9 ? 2 : 3;
+      for (let k = 0; k < n; k++) {
+        const atts = [], imgs = R() < 0.6 ? 1 + Math.floor(R() * 3) : 0;   // ≤ 3 photos + 1 video keeps a project's 4 site photos distinct
+        for (let j = 0; j < imgs; j++) atts.push(ratt('img'));
+        if (R() < 0.08) atts.push(ratt('video'));
+        if (p.cls === 'ترميم' && R() < 0.15) atts.push(ratt('pdf'));
+        if (p.cls === 'مساحة' && R() < 0.3) atts.push(ratt('kmz'));
+        if (p.cls === 'مساحة' && R() < 0.15) atts.push(ratt('dwg'));
+        if (p.cls === 'تراثي وأثري' && R() < 0.2) atts.push(ratt('3d'));
+        if (p.cls === 'بناء' && R() < 0.15) atts.push(ratt('pdf'));
+        if (p.cls === 'بناء' && R() < 0.1) atts.push(ratt('dwg'));
+        const hm = `${String(7 + Math.floor(R() * 9)).padStart(2, '0')}:${String(Math.floor(R() * 60)).padStart(2, '0')}`;
+        upd(p.code, p.team[Math.floor(R() * p.team.length)], d, hm, PHRASES[p.cls][Math.floor(R() * PHRASES[p.cls].length)], atts);
+      }
+    }
+  });
+  S.updates.sort((a, b) => b.at - a.at);
+
+  // Photo and video attachments show real site photos from their own project, in rotation.
+  const turn = {};
+  S.updates.forEach(u => {
+    const pool = [P(u.p).photo, ...P(u.p).shots];
+    u.atts.forEach(id => {
+      const a = S.atts[id];
+      if (a.t !== 'img' && a.t !== 'video') return;
+      const src = pool[(turn[u.p] = (turn[u.p] ?? -1) + 1) % pool.length];
+      if (a.t === 'img') a.url = src; else a.poster = src;
+    });
+  });
+
+  // Files uploaded directly to the project library by admins.
+  const direct = (p, t, name, size, date) => S.direct.push({ p, a: att(t, name, size).id, who: 'noura', date });
+  direct('PRJ-0142', 'dwg', 'masmak-plan-rev3.dwg', '8.4 MB', '2026-10-20');
+  direct('PRJ-0142', 'kmz', 'site-boundary.kmz', '640 KB', '2026-09-15');
+  direct('PRJ-0142', 'pdf', 'conservation-guidelines.pdf', '2.1 MB', '2026-09-15');
+  direct('PRJ-0138', 'kmz', 'wadi-hanifa-extent.kmz', '1.2 MB', '2026-10-01');
+  direct('PRJ-0138', 'pdf', 'survey-scope.pdf', '0.9 MB', '2026-10-01');
+  direct('PRJ-0127', 'pdf', 'heritage-permit-request.pdf', '1.1 MB', '2026-06-01');
+  direct('PRJ-0127', 'kmz', 'hegra-zones.kmz', '2.4 MB', '2026-06-01');
+  direct('PRJ-0119', 'dwg', 'structural-set-v5.dwg', '14.6 MB', '2026-03-01');
+  direct('PRJ-0119', 'pdf', 'handover-checklist.pdf', '0.6 MB', '2026-10-25');
+  direct('PRJ-0151', 'pdf', 'diriyah-survey-brief.pdf', '1.4 MB', '2026-10-28');
+  direct('PRJ-0151', 'kmz', 'turaif-zones.kmz', '960 KB', '2026-10-28');
+
+  // PM notifications (BRD): new daily update · status change (with suspend reason) · end date approaching · ended without extension.
+  const today = (code, who) => S.updates.find(u => u.p === code && u.author === who && u.date === TODAY);
+  const nu = (id, u) => ({ id, type: 'update', unread: true, p: u.p, u: u.id, title: 'تحديث يومي جديد', body: `${USERS[u.author].name} · ${P(u.p).name}`, at: u.at });
+  const wadi = P('PRJ-0138'), hegra = P('PRJ-0127');
+  S.notes = [
+    nu('n1', today('PRJ-0142', 'ahmed')), nu('n2', today('PRJ-0142', 'khalid')), nu('n3', today('PRJ-0138', 'sara')),
+    { id: 'n4', type: 'resumed', unread: true, p: wadi.code, title: 'تغيّرت حالة المشروع إلى «جارٍ التنفيذ»', body: `${wadi.name} — تم استئناف المشروع بعد التعليق المؤقت`, at: new Date(wadi.holds[0].resumedAt) },
+    { id: 'n5', type: 'ended', unread: false, p: 'PRJ-0119', title: 'انتهت مدة المشروع دون تمديد', body: 'إنشاء مبنى إداري — انتهى في 30 أكتوبر 2026', at: new Date('2026-10-31T00:05:00') },
+    { id: 'n6', type: 'suspended', unread: false, p: wadi.code, title: 'تغيّرت حالة المشروع إلى «معلق مؤقتًا»', body: `${wadi.name} — السبب: ${wadi.holds[0].reason}`, at: new Date(wadi.holds[0].at) },
+    { id: 'n7', type: 'approaching', unread: false, p: wadi.code, title: 'اقترب موعد انتهاء المشروع', body: `${wadi.name} — ينتهي في ${fmtDate(wadi.end)}`, at: new Date(`${addDays(wadi.end, -ALERT_DAYS)}T08:00:00`) },
+    { id: 'n8', type: 'suspended', unread: false, p: hegra.code, title: 'تغيّرت حالة المشروع إلى «معلق مؤقتًا»', body: `${hegra.name} — السبب: ${hegra.holds[0].reason}`, at: new Date(hegra.holds[0].at) },
+    { id: 'n9', type: 'approaching', unread: false, p: 'PRJ-0119', title: 'اقترب موعد انتهاء المشروع', body: `إنشاء مبنى إداري — ينتهي في ${fmtDate('2026-10-30')}`, at: new Date(`${addDays('2026-10-30', -ALERT_DAYS)}T08:00:00`) },
+  ];
+}
+
+/* Queries — PMs see only assigned, non-archived projects */
+const myProjects = () => S.noProjects ? [] : PROJECTS.filter(p => p.pms.includes('me'));
+const P = code => PROJECTS.find(p => p.code === code);
+const visibleCodes = () => myProjects().map(p => p.code);
+const shown = u => !u.hidden;
+const updatesOf = code => S.updates.filter(u => u.p === code && shown(u));
+const allVisibleUpdates = () => { const c = visibleCodes(); return S.updates.filter(u => c.includes(u.p) && shown(u)); };
+const U = id => S.updates.find(u => u.id === id);
+const authorName = (id, long) => id === 'me' ? (long ? `${USERS.me.name} (أنت)` : 'أنت') : USERS[id].name;
+const actorName = id => id === 'system' ? 'النظام (تلقائي)' : authorName(id);
+function filesOf(code) {
+  const fromUpdates = updatesOf(code).flatMap(u => u.atts.map(a => ({ a, who: u.author, date: u.date, at: u.at, src: 'update' })));
+  const direct = S.direct.filter(f => f.p === code).map(f => ({ a: f.a, who: f.who, date: f.date, at: parse(f.date), src: 'direct' }));
+  return [...fromUpdates, ...direct].sort((x, y) => y.at - x.at);
+}
+const unread = () => S.notes.filter(n => n.unread).length;
+const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const nMembers = n => countAr(n, 'بلا أعضاء', 'عضو واحد', 'عضوان', 'أعضاء', 'عضوًا');
+const nEvents = n => countAr(n, 'لا توجد أحداث', 'حدث واحد', 'حدثان', 'أحداث', 'حدثًا');
+const nDays = n => countAr(n, '', 'يوم واحد', 'يومان', 'أيام', 'يومًا');
+
+// Activity log (BRD): per assigned project, view-only, no export; internal admin operations (users, roles) are excluded.
+function activityOf(p) {
+  const ev = [];
+  const add = (at, kind, title, body = '', who = 'noura', extra = {}) => ev.push({ at: new Date(at), kind, title, body, who, ...extra });
+  const made = addDays(p.start, -14);
+  add(`${made}T09:00`, 'project', 'تم إنشاء المشروع', `${p.cls} · من ${fmtDate(p.start)} إلى ${fmtDate((p.ext || [])[0]?.from || p.end)}`);
+  [...p.pms, ...p.team].forEach((id, k) => add(`${made}T09:${String(10 + k * 3).padStart(2, '0')}`, 'team', `إسناد ${USERS[id].name} إلى المشروع`, USERS[id].role));
+  if (p.start <= TODAY) add(`${p.start}T00:00`, 'status', 'بدأ المشروع', 'تغيّرت الحالة تلقائيًا إلى «جارٍ التنفيذ»', 'system', { icon: ['solar:play-circle-bold', 'var(--success)'] });
+  (p.ext || []).forEach(x => add(x.at, 'dates', 'تمديد تاريخ النهاية', `من ${fmtDate(x.from)} إلى ${fmtDate(x.to)}`));
+  (p.holds || []).forEach(h => {
+    add(h.at, 'status', 'تعليق المشروع مؤقتًا', `السبب: ${h.reason}`, 'noura', { icon: ['solar:pause-circle-bold', 'var(--warning)'] });
+    if (h.resumedAt) add(h.resumedAt, 'status', 'استئناف المشروع', 'أُعيد احتساب الحالة من التواريخ: «جارٍ التنفيذ»', 'noura', { icon: ['solar:play-circle-bold', 'var(--success)'] });
+  });
+  if (TODAY > p.end && !p.onHold) add(`${addDays(p.end, 1)}T00:00`, 'status', 'انتهت مدة المشروع', 'تغيّرت الحالة تلقائيًا إلى «انتهت المدة» دون تمديد', 'system', { icon: ['solar:flag-bold', 'var(--muted)'] });
+  S.direct.filter(f => f.p === p.code).forEach(f => add(`${f.date}T10:00`, 'file', 'رفع ملف إلى مكتبة المشروع', S.atts[f.a].name, f.who));
+  updatesOf(p.code).forEach(u => add(u.at, 'update', 'تحديث يومي جديد', u.text, u.author, { u: u.id }));
+  return ev.sort((a, b) => b.at - a.at);
+}
+
+/* ═════════════════════ Router ═════════════════════ */
+const view = $('#view'), phone = $('#phone');
+const cur = () => S.stack[S.stack.length - 1];
+function go(name, params = {}) {
+  const sc = view.querySelector('.screen');
+  if (sc) cur().scroll = sc.scrollTop;
+  S.stack.push({ name, params });
+  render('fwd');
+}
+function back() {
+  if (S.stack.length > 1) { S.stack.pop(); render('back'); }
+}
+function tab(name) { S.stack = [{ name, params: {} }]; render('fade'); }
+function render(dir = 'none') {
+  closeOverlay();
+  const e = cur();
+  const old = view.querySelector('.screen');
+  if (dir === 'stay' && old) e.scroll = old.scrollTop;
+  const r = SCREENS[e.name](e.params);
+  const cls = { fwd: 'fwd', back: 'bk', fade: 'fade' }[dir] || '';
+  view.innerHTML = `<div class="screen ${cls}">${r.sb === false ? '' : '<div class="sb-bg"></div>'}${r.html}</div>`;
+  const tb = $('#tabbar');
+  tb.hidden = r.tab == null;
+  if (r.tab != null) tb.innerHTML = TABS.map(([k, icon, label], i) =>
+    `<button class="tab${i === r.tab ? ' active' : ''}" type="button" data-tab="${k}"${i === r.tab ? ' aria-current="page"' : ''}><iconify-icon icon="${icon}"></iconify-icon><span>${label}</span></button>`).join('');
+  decorate(view);
+  const sc = view.querySelector('.screen');
+  if ((dir === 'back' || dir === 'stay') && e.scroll) sc.scrollTop = e.scroll;
+  syncSide();
+}
+const TABS = [['home', 'solar:home-2-bold', 'الرئيسية'], ['map', 'solar:map-point-bold', 'الخريطة'], ['reports', 'solar:chart-2-bold', 'التقارير'], ['calendar', 'solar:calendar-bold', 'التقويم'], ['profile', 'solar:user-circle-bold', 'حسابي']];
+
+/* Overlays, toast */
+function openSheet(html) {
+  $('#overlay').innerHTML = `<div class="ov"><div class="ov-bg" data-act="closeOverlay"></div><div class="ov-sheet" role="dialog"><div class="grab"></div>${html}</div></div>`;
+  decorate($('#overlay'));
+}
+function closeOverlay() { $('#overlay').innerHTML = ''; $('#statusbar').classList.remove('light'); }
+let toastT;
+function toast(text, icon = 'solar:check-circle-bold') {
+  const t = $('#toast');
+  t.innerHTML = `<iconify-icon icon="${icon}"></iconify-icon><span>${esc(text)}</span>`;
+  t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ═════════════════════ Shared fragments ═════════════════════ */
+const ICON = (i, c = '') => `<iconify-icon icon="${i}"${c ? ` style="color:${c}"` : ''}></iconify-icon>`;
+const backBtn = `<button class="icon-btn" type="button" data-act="back" aria-label="رجوع">${ICON('solar:arrow-right-linear')}</button>`;
+const topbar = (title, k = '', lead = backBtn) => `<header class="topbar">${lead}<div class="t"><h2>${title}</h2>${k ? `<div class="k">${k}</div>` : ''}</div><span class="spacer"></span></header>`;
+const tabHead = (title, k, side = '') => `<header class="topbar" style="margin-bottom:22px"><div class="t" style="text-align:start"><div class="k">${k}</div><h2 style="font-size:24px;line-height:34px">${title}</h2></div>${side}</header>`;
+const projK = p => `${p.name} · <span class="code">${p.code}</span>`;
+const pip = (s, mod = '') => `<span class="pip ${STATUS[s].cls}${mod ? ' ' + mod : ''}">${STATUS[s].label}</span>`;
+const pthumb = p => `<span class="halo photo" style="background-image:url('${p.photo}')" aria-hidden="true"></span>`;
+const pcover = (p, cls = '') => `<span class="pcover${cls ? ' ' + cls : ''}" style="background-image:url('${p.photo}')" role="img" aria-label="صورة موقع ${p.name}"></span>`;
+const mapsUrl = p => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+const heroArt = (h, seed) => `<svg class="hero-art" viewBox="0 0 342 ${h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g data-contours='{"cx":34,"cy":24,"n":13,"r0":14,"gap":19,"amp":0.14,"seed":${seed},"dx":2.4,"dy":1.6}'></g></svg>`;
+const tone = id => (+id.slice(1)) % 4 + 1;
+function thumbHTML(a, inner = '') {
+  if (a.url && a.t === 'img') return `<span class="thumb has-img" style="background-image:url('${a.url}')">${inner}</span>`;
+  if (a.poster && a.t === 'video') return `<span class="thumb has-img" style="background-image:url('${a.poster}')"><span class="play">${ICON('solar:play-bold')}</span>${inner}</span>`;
+  return `<span class="thumb t${tone(a.id)}" data-seed="${+a.id.slice(1)}">${a.t === 'video' ? `<span class="play">${ICON('solar:play-bold')}</span>` : ''}${inner}</span>`;
+}
+function post(u, withProject) {
+  const atts = u.atts.map(id => S.atts[id]);
+  const media = atts.filter(a => a.t === 'img' || a.t === 'video'), docs = atts.filter(a => a.t !== 'img' && a.t !== 'video');
+  const shownM = media.slice(0, 3);
+  const strip = shownM.length ? `<span class="thumbs">${shownM.map((a, k) => thumbHTML(a, k === 2 && media.length > 3 ? `<span class="ov">+${media.length - 2}</span>` : '')).join('')}</span>` : '';
+  return `<button class="post" type="button" data-go="update" data-u="${u.id}">
+    <span class="post-head">
+      <span class="avatar sm" aria-hidden="true">${USERS[u.author].i}</span>
+      <span class="post-who"><strong>${authorName(u.author)}</strong><span>${USERS[u.author].role}${withProject ? ` · <span class="code">${u.p}</span>` : ''}</span></span>
+      <span class="post-time">${withProject ? rel(u.at) : fmtTime(u.at)}</span>
+    </span>
+    <p>${esc(u.text)}</p>
+    ${strip}
+    ${docs.length ? `<span class="atts">${docs.map(a => `<span class="att">${ICON(FT[a.t].icon, FT[a.t].tint)}${FT[a.t].label}</span>`).join('')}</span>` : ''}
+  </button>`;
+}
+function fileRow(f) {
+  const a = S.atts[f.a], t = FT[a.t];
+  const art = a.t === 'img' ? a.url : a.t === 'video' ? a.poster : null;
+  return `<div class="frow">
+    ${art ? `<span class="halo photo" style="background-image:url('${art}')" aria-hidden="true">${a.t === 'video' ? ICON('solar:play-bold', '#fff') : ''}</span>` : `<span class="halo">${ICON(t.icon, t.tint)}</span>`}
+    <span class="grow">
+      <span class="fname">${esc(a.name)}</span>
+      <span class="fmeta"><span class="latin">${a.size}</span><span class="dot"></span>${authorName(f.who)}<span class="dot"></span>${parse(f.date).getDate()} ${MONTHS[parse(f.date).getMonth()]}</span>
+      <span class="fmeta" style="margin-top:4px"><span class="tag">${f.src === 'update' ? 'مرفق تحديث' : 'رفع مباشر'}</span>${t.preview ? '' : '<span class="tag">تنزيل فقط</span>'}</span>
+    </span>
+    ${t.preview ? `<button class="icon-btn white sm" type="button" data-act="preview" data-a="${a.id}" aria-label="معاينة ${esc(a.name)}">${ICON('solar:eye-bold')}</button>`
+      : `<button class="icon-btn white sm" type="button" data-act="download" data-a="${a.id}" aria-label="تنزيل ${esc(a.name)}">${ICON('solar:download-minimalistic-bold')}</button>`}
+  </div>`;
+}
+const emptyBox = (icon, title, text) => `<div class="empty"><div class="halo">${ICON(icon)}</div><strong>${title}</strong><p>${text}</p></div>`;
+const NO_PROJECTS = 'لا توجد مشاريع مسندة إليك حاليًا';
+
+/* ═════════════════════ Screens ═════════════════════ */
+const SCREENS = {};
+
+SCREENS.login = () => ({
+  sb: false, tab: null,
+  html: `<div class="art photo" style="background-image:url('${PHOTO('login-aerial')}')">
+    <svg class="art-svg" viewBox="0 0 374 330" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g class="contours" data-contours='{"cx":236,"cy":178,"n":15,"r0":12,"gap":15,"amp":0.15,"seed":1.2,"dx":-2.2,"dy":1.4}'></g>
+      <path class="route" d="M62 290 C 104 276, 112 226, 156 214 S 214 196, 236 178"/>
+      <circle cx="62" cy="290" r="8" fill="#fff"/><circle cx="62" cy="290" r="4.5" fill="#000"/>
+      <circle class="ring" cx="236" cy="178" r="20"/><circle class="ring r2" cx="236" cy="178" r="20"/>
+      <circle cx="236" cy="178" r="19" fill="#fff"/><circle class="core" cx="236" cy="178" r="13"/><circle cx="236" cy="178" r="4.5" fill="#fff"/>
+    </svg>
+    <div class="art-top">
+      <div class="brand">
+        <svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="19"/><circle cx="19" cy="19" r="8" fill="none" stroke="#fff" stroke-width="2.4"/><circle cx="26.6" cy="11.4" r="3.6" fill="#F37F46"/></svg>
+        <div><div class="brand-name">Digital Operation</div><div class="brand-sub">التشغيل الرقمي</div></div>
+      </div>
+      <span class="glass-pill">واجهة مدير المشروع</span>
+    </div>
+    ${isDev() ? `<button class="dev-fill" type="button" data-act="fillDemo" aria-label="تعبئة بيانات الدخول التجريبية (وضع ${ENV === 'testing' ? 'الاختبار' : 'التطوير'})">${ICON('solar:magic-stick-3-bold')}تعبئة بيانات تجريبية<span class="env">${ENVS[ENV]}</span></button>` : ''}
+    <div class="art-foot"><span class="coord">N 24.6312° · E 46.7133°</span></div>
+  </div>
+  <form class="login-form" data-submit="login" novalidate>
+    <div class="kicker">تسجيل الدخول</div>
+    <h2 class="h-lg">مرحبًا بعودتك</h2>
+    <p class="lede">سجّل الدخول لمتابعة مشاريعك والاطلاع على التحديثات اليومية والتقارير.</p>
+    <div class="field"><label for="lgEmail">البريد الإلكتروني</label>
+      <div class="input">${ICON('solar:letter-bold')}<input id="lgEmail" type="email" inputmode="email" dir="ltr" placeholder="name@company.sa" autocomplete="username"></div></div>
+    <div class="field"><label for="lgPass">كلمة المرور</label>
+      <div class="input" id="lgPassBox">${ICON('solar:lock-password-bold')}<input id="lgPass" type="password" dir="ltr" placeholder="••••••••" autocomplete="current-password"><button type="button" class="eye" data-act="eye" aria-label="إظهار كلمة المرور">${ICON('solar:eye-bold')}</button></div></div>
+    <div class="msg" id="lgMsg" role="alert" hidden></div>
+    <button class="btn-primary" id="lgBtn" type="submit"><span>تسجيل الدخول</span>${ICON('solar:alt-arrow-left-bold')}<span class="spin" aria-hidden="true"></span></button>
+    <p class="help">${ICON('solar:info-circle-bold')}<span>الحسابات يُنشئها مسؤول النظام. لإعادة تعيين كلمة المرور تواصل مع المسؤول.</span></p>
+  </form>`,
+});
+
+SCREENS.home = () => {
+  const projects = myProjects();
+  const ws = projects.map(p => ({ p, s: computeStatus(p) }));
+  const ups = allVisibleUpdates();
+  const week = Array.from({ length: 7 }, (_, k) => ups.filter(u => u.date === addDays(TODAY, k - 6)).length);
+  const max = Math.max(1, ...week), today = week[6];
+  const soon = ws.filter(x => x.s === 'IN_PROGRESS' && daysBetween(TODAY, x.p.end) <= ALERT_DAYS).length;
+  const lastOf = code => updatesOf(code)[0];
+  const sorted = [...ws].sort((a, b) => (lastOf(b.p.code)?.at || 0) - (lastOf(a.p.code)?.at || 0));
+  const f = S.homeFilter, list = sorted.filter(x => f === 'ALL' || x.s === f);
+  const opts = [['ALL', 'الكل', ws.length], ...Object.entries(STATUS).map(([k, v]) => [k, v.short, ws.filter(x => x.s === k).length])];
+  const card = ({ p, s }) => {
+    const last = lastOf(p.code), n = updatesOf(p.code).filter(u => u.date === TODAY).length;
+    const note = n ? `<span class="note">${ICON('solar:document-add-bold', 'var(--primary)')}${countAr(n, '', 'تحديث واحد', 'تحديثان', 'تحديثات', 'تحديثًا')} اليوم</span>`
+      : s === 'ON_HOLD' ? `<span class="note">${ICON('solar:pause-circle-bold', 'var(--warning)')}معلق منذ ${parse(holdOf(p).from).getDate()} ${MONTHS[parse(holdOf(p).from).getMonth()]}</span>`
+      : s === 'ENDED' ? `<span class="note">${ICON('solar:flag-bold')}انتهى في ${parse(p.end).getDate()} ${MONTHS[parse(p.end).getMonth()]}</span>`
+      : s === 'NOT_STARTED' ? `<span class="note">${ICON('solar:calendar-mark-bold', 'var(--blue)')}يبدأ في ${parse(p.start).getDate()} ${MONTHS[parse(p.start).getMonth()]}</span>`
+      : `<span class="note">${ICON('solar:document-text-bold')}لا توجد تحديثات اليوم</span>`;
+    return `<article class="card" data-go="project" data-p="${p.code}">
+      ${pcover(p)}
+      <div class="card-head"><div class="card-title"><h3>${p.name}</h3><div class="card-meta"><span class="code">${p.code}</span><span class="dot"></span><span>${p.cls}</span></div></div>${pip(s)}</div>
+      <div class="facts"><span>${ICON('solar:map-point-bold')}${p.loc}</span><span>${ICON('solar:clock-circle-bold')}${last ? 'آخر تحديث ' + rel(last.at) : 'لا توجد تحديثات بعد'}</span><span>${ICON('solar:users-group-rounded-bold')}الفريق الميداني: ${nMembers(p.team.length)}</span></div>
+      <div class="card-foot">${note}<button class="link" type="button" data-go="project" data-p="${p.code}">عرض تفاصيل المشروع${ICON('solar:alt-arrow-left-linear')}</button></div>
+    </article>`;
+  };
+  const listHTML = !projects.length ? emptyBox('solar:folder-open-bold', NO_PROJECTS, 'ستظهر هنا المشاريع فور إسنادها إليك من قِبل المسؤول.')
+    : !list.length ? emptyBox('solar:filter-bold', 'لا توجد مشاريع بهذه الحالة', 'جرّب اختيار حالة أخرى أو عرض الكل.') : list.map(card).join('');
+  const unit = n => n === 0 ? 'لا توجد مشاريع مسندة' : n === 1 ? 'مشروع تحت إشرافك' : n === 2 ? 'مشروعان تحت إشرافك' : n <= 10 ? 'مشاريع تحت إشرافك' : 'مشروعًا تحت إشرافك';
+  const feed = ups.slice(0, 2);
+  const d = parse(TODAY);
+  return { tab: 0, html: `<div class="body with-tabs">
+    <header class="appbar">
+      <div class="who"><div class="avatar" aria-hidden="true">${USERS.me.i}</div><div><div class="kicker-sm">${WD[d.getDay()]}، ${d.getDate()} ${MONTHS[d.getMonth()]}</div><h2 class="h-md">صباح الخير، ${USERS.me.first}</h2></div></div>
+      <button class="icon-btn" type="button" data-go="notifications" aria-label="الإشعارات${unread() ? ` — ${unread()} غير مقروءة` : ''}">${ICON('solar:bell-bold')}${unread() ? `<span class="badge" aria-hidden="true">${unread()}</span>` : ''}</button>
+    </header>
+    <section class="hero" aria-label="ملخص المشاريع">
+      ${heroArt(236, 2.6)}
+      <div class="hero-top"><span class="hero-label">${ICON('solar:folder-with-files-bold')}مشاريعك المسندة</span><span class="badge-pill">${ICON('solar:eye-bold')}عرض فقط</span></div>
+      <div class="hero-num"><span class="num" dir="ltr">${projects.length}</span><span class="unit">${unit(projects.length)}</span></div>
+      ${projects.length ? `<div class="hero-actions"><button class="btn-white" type="button" data-tab="reports">${ICON('solar:chart-2-bold')}عرض التقارير</button><span class="badge-pill">${ICON('solar:document-text-bold')}${countAr(today, 'لا تحديثات اليوم', 'تحديث واحد اليوم', 'تحديثان اليوم', 'تحديثات اليوم', 'تحديثًا اليوم')}</span></div>` : ''}
+    </section>
+    <div class="tiles">
+      <div class="tile"><div class="tile-top"><div class="halo">${ICON('solar:document-text-bold', 'var(--blue)')}</div><span class="tag">آخر 7 أيام</span></div>
+        <div class="bars" aria-hidden="true">${week.map((v, i) => `<i class="${i === 6 ? 'today' : ''}"><b style="height:${v ? Math.max(18, v / max * 100) : 0}%"></b></i>`).join('')}</div>
+        <div class="tile-val"><span class="num">${week.reduce((a, b) => a + b, 0)}</span><div class="tile-label">تحديثات الفرق الميدانية</div></div></div>
+      <div class="tile"><div class="tile-top"><div class="halo">${ICON('solar:hourglass-bold', 'var(--warning)')}</div><span class="tag">خلال ${ALERT_DAYS} يومًا</span></div>
+        <div class="tile-val"><span class="num">${soon}</span><div class="tile-label">مشروع جارٍ يقترب من تاريخ النهاية</div></div></div>
+    </div>
+    <div class="sec-head"><div><h3 class="h-md">مشاريعي</h3><div class="sec-sub">مرتبة حسب آخر تحديث</div></div></div>
+    ${projects.length ? `<div class="seg" role="group" aria-label="تصفية حسب الحالة">${opts.map(([k, l, c]) => `<button type="button" data-act="homeFilter" data-f="${k}" aria-pressed="${k === f}">${l}<span class="c">${c}</span></button>`).join('')}</div>` : ''}
+    <div class="list">${listHTML}</div>
+    ${feed.length ? `<div class="sec-head"><div><h3 class="h-md">آخر التحديثات</h3><div class="sec-sub">من الفرق الميدانية لمشاريعك</div></div></div><div class="stack">${feed.map(u => post(u, true)).join('')}</div>` : ''}
+  </div>` };
+};
+
+SCREENS.project = ({ p: code }) => {
+  const p = P(code), s = computeStatus(p), ups = updatesOf(code), files = filesOf(code), hold = holdOf(p), left = daysBetween(TODAY, p.end);
+  const short = s => `${parse(s).getDate()} ${MONTHS[parse(s).getMonth()]}`;
+  const [cIcon, cText] = {
+    IN_PROGRESS: ['solar:hourglass-bold', `متبقٍ ${nDays(left)}`],
+    ON_HOLD: ['solar:pause-circle-bold', `معلق منذ ${hold && short(hold.from)}`],
+    ENDED: ['solar:flag-bold', `انتهى في ${short(p.end)}`],
+    NOT_STARTED: ['solar:calendar-mark-bold', `يبدأ بعد ${nDays(daysBetween(TODAY, p.start))}`],
+  }[s];
+  const members = [...p.pms, ...p.team];
+  const person = id => `<div class="person"><div class="avatar sm" aria-hidden="true">${USERS[id].i}</div><div><strong>${authorName(id, true)}</strong><span>${USERS[id].role}</span></div></div>`;
+  const latest = ups.slice(0, 5).map(u => {
+    const n = u.atts.length;
+    return `<button class="mini" type="button" data-go="update" data-u="${u.id}"><span class="avatar sm" aria-hidden="true">${USERS[u.author].i}</span><span class="mini-body">
+      <span class="mini-top"><strong>${authorName(u.author)}</strong><span>${rel(u.at)}</span></span><p>${esc(u.text)}</p>
+      ${n ? `<span class="cnt">${ICON('solar:paperclip-bold')}${nAtts(n)}</span>` : ''}</span></button>`;
+  }).join('');
+  return { html: `<div class="body">
+    ${topbar('تفاصيل المشروع')}
+    ${pcover(p, 'lg')}
+    <section class="hero">
+      ${heroArt(300, 3.1)}
+      <div class="hero-top"><span class="hero-label"><span class="code">${code}</span><span>·</span>${p.cls}</span>${pip(s, 'on-hero')}</div>
+      <h3 class="hero-title">${p.name}</h3>
+      <div class="dates"><div><span>تاريخ البداية</span><strong>${fmtDate(p.start)}</strong></div><div><span>تاريخ النهاية</span><strong>${fmtDate(p.end)}</strong></div></div>
+      <div class="hero-actions"><span class="badge-pill">${ICON(cIcon)}${cText}</span><span class="badge-pill">${ICON('solar:eye-bold')}عرض فقط</span></div>
+    </section>
+    ${hold ? `<div class="susp" role="note"><span class="halo">${ICON('solar:pause-circle-bold', 'var(--warning)')}</span><div><strong>المشروع معلق مؤقتًا</strong><p>${esc(hold.reason)}</p>
+      <span class="m">علّقته ${USERS.noura.name} · ${fmtDate(hold.from)}، ${fmtTime(new Date(hold.at))}</span></div></div>` : ''}
+    ${s === 'IN_PROGRESS' && left <= ALERT_DAYS ? `<div class="msg msg-warn" style="margin:12px 0 0">${ICON('solar:hourglass-bold')}<span>يقترب المشروع من تاريخ النهاية: ${fmtDate(p.end)} (بعد ${nDays(left)}).</span></div>` : ''}
+    <section class="loc" aria-label="الموقع">
+      <div class="loc-map"><svg viewBox="0 0 326 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <path class="road" d="M-10 118 C 70 104, 120 128, 190 92 S 300 60, 340 70"/><path class="road" d="M120 -10 C 140 40, 150 90, 132 160"/>
+        <g data-contours='{"cx":163,"cy":75,"n":10,"r0":10,"gap":15,"amp":0.16,"seed":${(p.lat % 3).toFixed(2)},"dx":-1.5,"dy":0.8}'></g></svg><span class="loc-pin"><i></i></span></div>
+      <div class="loc-info"><div><strong>${p.loc}</strong><span class="coord">N ${p.lat.toFixed(4)}° · E ${p.lng.toFixed(4)}°</span></div>
+        <a class="chip-btn" href="${mapsUrl(p)}" target="_blank" rel="noopener">${ICON('solar:routing-2-bold')}الاتجاهات</a></div>
+    </section>
+    <div class="panel" style="margin-top:12px"><h4>عن المشروع</h4><p>${p.desc}</p></div>
+    <div class="sec-head"><div><h3 class="h-md">آخر التحديثات</h3><div class="sec-sub">${ups.length ? `أحدث ${Math.min(5, ups.length)} من ${nUpdates(ups.length)}` : 'لا توجد تحديثات بعد'}</div></div>
+      ${ups.length ? `<button class="text-btn" type="button" data-go="updates" data-p="${code}">عرض الكل${ICON('solar:alt-arrow-left-linear')}</button>` : ''}</div>
+    ${ups.length ? `<div class="panel stack">${latest}</div>` : emptyBox('solar:document-text-bold', 'لا توجد تحديثات بعد', 'ستظهر هنا أحدث 5 تحديثات فور إضافتها من الفريق الميداني.')}
+    <div class="sec-head"><div><h3 class="h-md">فريق العمل</h3><div class="sec-sub">${nMembers(members.length)}</div></div></div>
+    <div class="panel stack">${members.map(person).join('')}</div>
+    <button class="lrow" type="button" data-go="files" data-p="${code}">
+      <span class="halo">${ICON('solar:folder-with-files-bold', 'var(--indigo)')}</span>
+      <span class="grow"><strong>مكتبة الملفات</strong><span>${nFiles(files.length)}${files.length ? ` · آخر إضافة ${rel(files[0].at)}` : ''}</span></span>${ICON('solar:alt-arrow-left-linear')}</button>
+    <button class="lrow" type="button" data-go="activity" data-p="${code}">
+      <span class="halo">${ICON('solar:history-bold', 'var(--warning)')}</span>
+      <span class="grow"><strong>سجل النشاط</strong><span>${nEvents(activityOf(p).length)} · للعرض فقط</span></span>${ICON('solar:alt-arrow-left-linear')}</button>
+    <button class="lrow" type="button" data-act="openReport" data-p="${code}">
+      <span class="halo">${ICON('solar:chart-2-bold', 'var(--primary)')}</span>
+      <span class="grow"><strong>تقرير المشروع</strong><span>التحديثات وأيام العمل ونشاط الفريق</span></span>${ICON('solar:alt-arrow-left-linear')}</button>
+  </div>` };
+};
+
+SCREENS.updates = params => {
+  const p = P(params.p), all = updatesOf(p.code), who = params.who || '';
+  const authors = [...new Set(all.map(u => u.author))];
+  const list = who ? all.filter(u => u.author === who) : all, limit = params.limit || 6;
+  const days = [...new Set(list.map(u => u.date))];
+  const label = d => d === TODAY ? `اليوم · ${fmtDay(d)}` : d === addDays(TODAY, -1) ? `أمس · ${fmtDay(d)}` : fmtDay(d);
+  const groups = days.slice(0, limit).map((d, i) => {
+    const items = list.filter(u => u.date === d);
+    return `<div class="day-head${i ? '' : ' first'}"><span>${label(d)}</span><span>${nUpdates(items.length)}</span></div><div class="stack">${items.map(u => post(u)).join('')}</div>`;
+  }).join('');
+  return { html: `<div class="body">
+    ${topbar('التحديثات اليومية', projK(p))}
+    ${all.length ? `<div class="seg" role="group" aria-label="تصفية حسب عضو الفريق">
+      <button type="button" data-act="updFilter" data-f="" aria-pressed="${!who}">الكل<span class="c">${all.length}</span></button>
+      ${authors.map(id => `<button type="button" data-act="updFilter" data-f="${id}" aria-pressed="${who === id}">${USERS[id].name.split(' ')[0]}<span class="c">${all.filter(u => u.author === id).length}</span></button>`).join('')}</div>` : ''}
+    ${list.length ? groups : emptyBox('solar:document-text-bold', 'لا توجد تحديثات بعد', 'ستظهر هنا التحديثات اليومية فور إضافتها من الفريق الميداني.')}
+    ${days.length > limit ? `<button class="more-btn" type="button" data-act="more">${ICON('solar:alt-arrow-down-linear')}عرض أيام أقدم</button>` : ''}
+  </div>` };
+};
+
+SCREENS.update = ({ u: id }) => {
+  const u = U(id), p = P(u.p), atts = u.atts.map(a => S.atts[a]);
+  const media = atts.filter(a => a.t === 'img' || a.t === 'video'), docs = atts.filter(a => a.t !== 'img' && a.t !== 'video');
+  return { html: `<div class="body">
+    ${topbar('تفاصيل التحديث', projK(p))}
+    <div class="person" style="margin-bottom:16px"><div class="avatar" aria-hidden="true">${USERS[u.author].i}</div><div><strong>${authorName(u.author, true)}</strong><span>${USERS[u.author].role}</span></div></div>
+    <div class="meta-grid"><div><span>تاريخ التحديث</span><strong>${fmtDate(u.date)}</strong></div><div><span>وقت الإضافة</span><strong>${fmtTime(u.at)}</strong></div></div>
+    <div class="panel" style="margin-top:12px"><p style="unicode-bidi:plaintext">${esc(u.text)}</p></div>
+    <div class="sec-head" style="margin-top:26px"><div><h3 class="h-md">المرفقات</h3><div class="sec-sub">${nAtts(atts.length)}</div></div></div>
+    ${media.length ? `<div class="thumbs">${media.map(a => `<button class="thumb-btn" type="button" data-act="preview" data-a="${a.id}" aria-label="معاينة ${esc(a.name)}">${thumbHTML(a)}</button>`).join('')}</div>` : ''}
+    ${docs.length ? `<div class="flist" style="margin-top:8px">${docs.map(a => fileRow({ a: a.id, who: u.author, date: u.date, src: 'update' })).join('')}</div>` : ''}
+    ${atts.length ? '' : emptyBox('solar:paperclip-bold', 'لا توجد مرفقات', 'أُضيف هذا التحديث بدون مرفقات.')}
+    <div class="msg msg-info" style="margin-top:16px">${ICON('solar:eye-bold')}<span>للعرض فقط. يمكنك معاينة المرفقات وتنزيلها.</span></div>
+  </div>` };
+};
+
+SCREENS.files = params => {
+  const p = P(params.p), all = filesOf(p.code), k = params.f || 'all', limit = params.limit || 12;
+  const match = f => { const t = S.atts[f.a].t; return k === 'all' || (k === 'eng' ? ENG.includes(t) : t === k); };
+  const list = all.filter(match);
+  const c = t => all.filter(f => { const x = S.atts[f.a].t; return t === 'eng' ? ENG.includes(x) : x === t; }).length;
+  const opts = [['all', 'الكل', all.length], ['img', 'صور', c('img')], ['video', 'فيديو', c('video')], ['pdf', 'PDF', c('pdf')], ['eng', 'هندسية', c('eng')]];
+  return { html: `<div class="body">
+    ${topbar('مكتبة الملفات', projK(p))}
+    <div class="seg" role="group" aria-label="تصفية حسب النوع">${opts.map(([key, l, n]) => `<button type="button" data-act="fileFilter" data-f="${key}" aria-pressed="${key === k}">${l}<span class="c">${n}</span></button>`).join('')}</div>
+    <div class="flist">${list.length ? list.slice(0, limit).map(fileRow).join('') : emptyBox('solar:folder-open-bold', 'لا توجد ملفات من هذا النوع', 'جرّب نوعًا آخر أو عرض الكل.')}</div>
+    ${list.length > limit ? `<button class="more-btn" type="button" data-act="more">${ICON('solar:alt-arrow-down-linear')}عرض المزيد (${list.length - limit})</button>` : ''}
+    <div class="msg msg-info" style="margin-top:16px">${ICON('solar:info-circle-bold')}<span>يمكنك عرض الملفات وتنزيلها فقط. تُعرض الصور والفيديو وPDF داخل التطبيق، أما الملفات الهندسية فللتنزيل فقط.</span></div>
+  </div>` };
+};
+
+const AK = { project: ['solar:folder-with-files-bold', 'var(--indigo)'], team: ['solar:user-plus-bold', 'var(--blue)'], status: ['solar:refresh-circle-bold', 'var(--warning)'],
+  dates: ['solar:calendar-date-bold', 'var(--indigo)'], file: ['solar:upload-minimalistic-bold', 'var(--success)'], update: ['solar:document-text-bold', 'var(--primary)'] };
+const ACT_GROUPS = { update: ['update'], status: ['status', 'dates', 'project'], team: ['team'], file: ['file'] };
+SCREENS.activity = params => {
+  const p = P(params.p), all = activityOf(p), k = params.f || 'all', limit = params.limit || 20;
+  const inG = (e, g) => g === 'all' || ACT_GROUPS[g].includes(e.kind);
+  const list = all.filter(e => inG(e, k));
+  const opts = [['all', 'الكل'], ['update', 'التحديثات'], ['status', 'الحالة والتواريخ'], ['team', 'الفريق'], ['file', 'الملفات']];
+  let h = '', day = '';
+  list.slice(0, limit).forEach((e, i) => {
+    const d = iso(e.at);
+    if (d !== day) { if (day) h += '</div>'; day = d; h += `<div class="day-head${i ? '' : ' first'}"><span>${d === TODAY ? 'اليوم · ' : d === addDays(TODAY, -1) ? 'أمس · ' : ''}${fmtDate(d)}</span></div><div>`; }
+    const [icon, tint] = e.icon || AK[e.kind];
+    const inner = `<span class="halo">${ICON(icon, tint)}</span><span class="tl-body"><strong>${e.title}</strong>${e.body ? `<p>${esc(e.body)}</p>` : ''}<span class="tl-meta">${actorName(e.who)}<span class="dot"></span>${fmtTime(e.at)}</span></span>`;
+    h += e.u ? `<button class="tl-item" type="button" data-go="update" data-u="${e.u}">${inner}</button>` : `<div class="tl-item">${inner}</div>`;
+  });
+  if (day) h += '</div>';
+  return { html: `<div class="body">
+    ${topbar('سجل النشاط', projK(p))}
+    <div class="seg" role="group" aria-label="تصفية السجل">${opts.map(([key, l]) => `<button type="button" data-act="actFilter" data-f="${key}" aria-pressed="${key === k}">${l}<span class="c">${all.filter(e => inG(e, key)).length}</span></button>`).join('')}</div>
+    ${list.length ? h : emptyBox('solar:history-bold', 'لا توجد أحداث من هذا النوع', 'جرّب نوعًا آخر أو عرض الكل.')}
+    ${list.length > limit ? `<button class="more-btn" type="button" data-act="more">${ICON('solar:alt-arrow-down-linear')}عرض المزيد (${list.length - limit})</button>` : ''}
+    <div class="msg msg-info" style="margin-top:16px">${ICON('solar:lock-keyhole-minimalistic-bold')}<span>يعرض السجل عمليات هذا المشروع فقط، دون العمليات الإدارية الداخلية مثل المستخدمين والأدوار. للعرض فقط ولا يمكن تصديره.</span></div>
+  </div>` };
+};
+
+const PERIODS = [['7', 'آخر 7 أيام'], ['30', 'آخر 30 يومًا'], ['all', 'منذ البداية']];
+SCREENS.reports = () => {
+  const projects = myProjects();
+  const head = tabHead('التقارير', 'لمشاريعك المسندة فقط');
+  if (!projects.length) return { tab: 2, html: `<div class="body with-tabs">${head}${emptyBox('solar:chart-2-bold', NO_PROJECTS, 'ستظهر هنا تقارير مشاريعك فور إسنادها إليك.')}</div>` };
+  const r = S.rep;
+  if (r.p !== 'ALL' && !projects.some(p => p.code === r.p)) r.p = 'ALL';
+  const sel = r.p === 'ALL' ? projects : [P(r.p)];
+  const from = r.period === 'all' ? sel.map(p => p.start).sort()[0] : addDays(TODAY, 1 - +r.period);
+  // Reports exclude hidden updates (allVisibleUpdates never returns them).
+  const ups = allVisibleUpdates().filter(u => sel.some(p => p.code === u.p) && u.date >= from && u.date <= TODAY);
+  const attsN = ups.reduce((n, u) => n + u.atts.length, 0);
+  const people = new Set(ups.map(u => u.author)).size;
+  const st = Object.keys(STATUS).map(k => [k, sel.filter(p => computeStatus(p) === k).length]);
+  const classes = [...new Set(sel.map(p => p.cls))].map(c => [c, sel.filter(p => p.cls === c).length]);
+
+  // Updates over the period: per project, or per day / week for a single project.
+  let buckets, bTitle, bSub;
+  if (r.p === 'ALL') { buckets = sel.map(p => [p.short, ups.filter(u => u.p === p.code).length]); bTitle = 'التحديثات لكل مشروع'; bSub = 'عدد التحديثات اليومية خلال الفترة'; }
+  else if (r.period === '7') { buckets = Array.from({ length: 7 }, (_, i) => addDays(TODAY, -i)).map(d => [fmtDay(d).split(' ').slice(0, 2).join(' '), ups.filter(u => u.date === d).length]); bTitle = 'التحديثات حسب اليوم'; bSub = 'أحدث الأيام أولًا'; }
+  else {
+    buckets = [];
+    for (let end = TODAY; end >= from && buckets.length < 10; end = addDays(end, -7)) {
+      const start = addDays(end, -6);
+      buckets.push([`أسبوع ${parse(start).getDate()} ${MONTHS[parse(start).getMonth()]}`, ups.filter(u => u.date >= start && u.date <= end).length]);
+    }
+    bTitle = 'التحديثات حسب الأسبوع'; bSub = 'أحدث الأسابيع أولًا';
+  }
+  const bMax = Math.max(1, ...buckets.map(b => b[1]));
+
+  // Days without updates: working days (Sun–Thu) while the project was running and not suspended.
+  const gaps = sel.map(p => {
+    let work = 0, empty = 0;
+    const end = [p.end, TODAY].sort()[0];
+    for (let d = [p.start, from].sort()[1]; d <= end; d = addDays(d, 1)) {
+      const wd = parse(d).getDay();
+      if (wd === 5 || wd === 6 || inHold(p, d)) continue;
+      work++;
+      if (!ups.some(u => u.p === p.code && u.date === d)) empty++;
+    }
+    return { p, work, empty };
+  }).filter(g => g.work);
+
+  // Employee activity: counts only — never a performance score (BRD).
+  const emps = [...new Set(sel.flatMap(p => p.team))].map(id => {
+    const mine = ups.filter(u => u.author === id);
+    return { id, n: mine.length, a: mine.reduce((k, u) => k + u.atts.length, 0), last: mine[0] };
+  }).sort((a, b) => b.n - a.n);
+  const pLabel = PERIODS.find(x => x[0] === r.period)[1];
+  const unitU = n => n === 1 ? 'تحديث يومي' : n === 2 ? 'تحديثان يوميان' : n >= 3 && n <= 10 ? 'تحديثات يومية' : n === 0 ? 'تحديثات يومية' : 'تحديثًا يوميًا';
+
+  return { tab: 2, html: `<div class="body with-tabs">
+    ${head}
+    <div class="seg fill" role="group" aria-label="الفترة">${PERIODS.map(([k, l]) => `<button type="button" data-act="repPeriod" data-f="${k}" aria-pressed="${k === r.period}">${l}</button>`).join('')}</div>
+    <div class="seg" role="group" aria-label="المشروع"><button type="button" data-act="repProject" data-f="ALL" aria-pressed="${r.p === 'ALL'}">كل المشاريع</button>${projects.map(p => `<button type="button" data-act="repProject" data-f="${p.code}" aria-pressed="${r.p === p.code}">${p.short}</button>`).join('')}</div>
+    <section class="hero" aria-label="ملخص الفترة">
+      ${heroArt(236, 1.4)}
+      <div class="hero-top"><span class="hero-label">${ICON('solar:chart-2-bold')}${r.p === 'ALL' ? 'كل المشاريع' : P(r.p).name}</span><span class="badge-pill">${pLabel}</span></div>
+      <div class="hero-num"><span class="num" dir="ltr">${ups.length}</span><span class="unit">${unitU(ups.length)}</span></div>
+      <div class="hero-actions"><span class="badge-pill">${ICON('solar:paperclip-bold')}${nAtts(attsN)}</span><span class="badge-pill">${ICON('solar:users-group-rounded-bold')}${countAr(people, 'لا مشاركين', 'مشارك واحد', 'مشاركان', 'مشاركين', 'مشاركًا')}</span></div>
+    </section>
+    <div class="rsec"><h4>المشاريع حسب الحالة</h4><div class="sec-sub">${countAr(sel.length, 'لا مشاريع', 'مشروع واحد', 'مشروعان', 'مشاريع', 'مشروعًا')} · الحالة الحالية</div>
+      <div class="sbar" role="img" aria-label="${st.map(([k, n]) => `${STATUS[k].label}: ${n}`).join('، ')}">${st.filter(x => x[1]).map(([k, n]) => `<i style="flex:${n};background:${STATUS[k].color}"></i>`).join('')}</div>
+      <div class="slegend">${st.map(([k, n]) => `<span><i style="background:${STATUS[k].color}"></i>${STATUS[k].label}<b>${n}</b></span>`).join('')}</div>
+      <div class="cls-row">${classes.map(([c, n]) => `<span class="tag2" style="background:#fff">${c} · <span class="latin">${n}</span></span>`).join('')}</div></div>
+    <div class="rsec"><h4>${bTitle}</h4><div class="sec-sub">${bSub}</div>
+      ${buckets.map(([l, v]) => `<div class="hrow"><span class="l">${l}</span><span class="tr"><b style="width:${v / bMax * 100}%"></b></span><span class="v">${v}</span></div>`).join('')}</div>
+    <div class="rsec"><h4>أيام بلا تحديثات</h4><div class="sec-sub">أيام العمل (الأحد–الخميس) أثناء سير المشروع، دون فترات التعليق</div>
+      ${gaps.length ? gaps.map(g => `<div class="hrow"><span class="l">${g.p.short}</span><span class="tr"><b class="warn" style="width:${g.empty / g.work * 100}%"></b></span><span class="v">${g.empty}/${g.work}</span></div>`).join('')
+        : `<p class="sec-sub" style="margin:0">لا توجد أيام عمل ضمن هذه الفترة.</p>`}</div>
+    <div class="rsec"><h4>نشاط الموظفين</h4><div class="sec-sub">أعداد فقط، وليست تقييمًا للأداء</div>
+      ${emps.length ? emps.map(e => `<div class="erow"><span class="avatar sm" aria-hidden="true">${USERS[e.id].i}</span><span class="grow"><strong>${USERS[e.id].name}</strong><span>${USERS[e.id].role}${e.last ? ` · آخر تحديث ${rel(e.last.at)}` : ''}</span></span>
+        <span class="ecount"><b>${e.n}</b><span>تحديث</span></span><span class="ecount"><b>${e.a}</b><span>مرفق</span></span></div>`).join('')
+        : `<p class="sec-sub" style="margin:0">لا يوجد موظفون في هذه المشاريع.</p>`}</div>
+    <div class="msg msg-info" style="margin-top:16px">${ICON('solar:info-circle-bold')}<span>تشمل التقارير المشاريع المسندة إليك فقط، وتستثني التحديثات التي أخفتها الإدارة.</span></div>
+  </div>` };
+};
+
+SCREENS.map = () => {
+  const projects = myProjects().filter(p => !S.mapHide.includes(computeStatus(p)));
+  if (!projects.some(p => p.code === S.mapSel) && projects.length) S.mapSel = projects[0].code;
+  const sel = projects.find(p => p.code === S.mapSel);
+  const pins = projects.map(p => {
+    const on = p === sel;
+    return `<button class="pin${on ? ' sel' : ''}" type="button" data-act="mapPin" data-p="${p.code}" style="left:${p.x}%;top:${p.y}%" aria-label="${p.name}"><i style="background:${STATUS[computeStatus(p)].color}"></i></button>${on ? `<span class="pin-label" style="left:${p.x}%;top:${p.y}%">${p.name}</span>` : ''}`;
+  }).join('');
+  const sheet = sel ? (() => { const s = computeStatus(sel); return `<div class="grab"></div>
+    <div class="card-head">${pthumb(sel)}
+      <div class="card-title"><h3>${sel.name}</h3><div class="card-meta"><span class="code">${sel.code}</span><span class="dot"></span><span>${sel.cls}</span></div></div>${pip(s)}</div>
+    <div class="facts" style="margin-top:12px"><span>${ICON('solar:map-point-bold')}${sel.loc}</span></div>
+    <div class="btn-row"><a class="btn-primary sm" href="${mapsUrl(sel)}" target="_blank" rel="noopener">${ICON('solar:routing-2-bold')}الاتجاهات</a>
+      <button class="btn-sec" type="button" data-go="project" data-p="${sel.code}">عرض تفاصيل المشروع</button></div>`; })()
+    : `<div class="grab"></div><div class="empty" style="padding:20px">${myProjects().length ? '<strong>لا توجد مشاريع بالحالات المحددة</strong><p>فعّل حالة واحدة على الأقل لعرض مواقعها.</p>' : `<strong>${NO_PROJECTS}</strong><p>ستظهر مواقع مشاريعك هنا فور إسنادها.</p>`}</div>`;
+  return { sb: false, tab: 1, html: `<div class="map">
+      <svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <path class="sea" d="M-20 300 C 30 360, 40 470, 70 560 S 120 760, 160 880 L -20 880 Z"/>
+        <path class="road" d="M80 520 C 150 470, 220 430, 300 400 S 380 380, 420 380"/><path class="road" d="M120 160 C 170 260, 220 320, 290 390"/><path class="road" d="M290 390 C 300 470, 320 560, 360 660"/>
+        <g class="contours" data-contours='{"cx":120,"cy":200,"n":9,"r0":14,"gap":18,"amp":0.18,"seed":1.7,"dx":1.5,"dy":1}'></g>
+        <g class="contours" data-contours='{"cx":300,"cy":420,"n":11,"r0":12,"gap":17,"amp":0.16,"seed":0.6,"dx":-1.2,"dy":1.4}'></g>
+        <g class="contours" data-contours='{"cx":250,"cy":680,"n":8,"r0":16,"gap":18,"amp":0.18,"seed":2.4,"dx":1,"dy":-1}'></g>
+      </svg>${pins}</div>
+    <div class="map-top">
+      <div class="glass map-title"><div><strong>مواقع المشاريع</strong> <span class="muted" style="font-size:12px;font-weight:700"> · ${projects.length} من ${myProjects().length}</span></div>
+        <button class="icon-btn" type="button" data-act="mapAll" aria-label="عرض كل الحالات">${ICON('solar:map-bold')}</button></div>
+      <div class="glass map-legend" role="group" aria-label="تصفية حسب الحالة">${['IN_PROGRESS', 'ON_HOLD', 'ENDED', 'NOT_STARTED'].map(k =>
+        `<button type="button" class="pip ${STATUS[k].cls}${S.mapHide.includes(k) ? ' off' : ''}" data-act="mapFilter" data-s="${k}" aria-pressed="${!S.mapHide.includes(k)}">${STATUS[k].short}</button>`).join('')}</div>
+    </div>
+    <div class="sheet">${sheet}</div>` };
+};
+
+const CAL_MIN = [2026, 3], CAL_MAX = [2026, 11];
+SCREENS.calendar = () => {
+  const { y, m } = S.cal, first = new Date(y, m - 1, 1), daysIn = new Date(y, m, 0).getDate();
+  const ups = allVisibleUpdates();
+  const cnt = d => ups.filter(u => u.date === d).length;
+  let cells = '<span class="d blank"></span>'.repeat(first.getDay());
+  for (let d = 1; d <= daysIn; d++) {
+    const ds = iso(new Date(y, m - 1, d)), c = cnt(ds), wd = new Date(y, m - 1, d).getDay();
+    const future = ds > TODAY;
+    const cls = ['d', future ? 'future' : c >= 3 ? 'l3' : c === 2 ? 'l2' : c === 1 ? 'l1' : (wd === 5 || wd === 6) ? 'rest' : '', ds === TODAY ? 'today' : '', d === S.cal.d ? 'sel' : ''].join(' ');
+    cells += `<button type="button" class="${cls}" data-act="calDay" data-d="${d}"${future ? ' disabled' : ''} aria-label="${d} ${MONTHS[m - 1]}، ${nUpdates(c)}">${d}</button>`;
+  }
+  const selIso = iso(new Date(y, m - 1, S.cal.d)), dayUps = ups.filter(u => u.date === selIso);
+  const atMin = y === CAL_MIN[0] && m === CAL_MIN[1], atMax = y === CAL_MAX[0] && m === CAL_MAX[1];
+  const item = u => `<button class="panel" type="button" data-go="update" data-u="${u.id}" style="padding:16px 18px;width:100%;text-align:start"><span class="mini">
+      <span class="avatar sm" aria-hidden="true">${USERS[u.author].i}</span>
+      <span class="mini-body"><span class="mini-top"><strong>${authorName(u.author)}</strong><span>${fmtTime(u.at)}</span></span>
+      <p style="white-space:normal;color:#000;font-size:14px;line-height:22px;margin-top:4px">${esc(u.text)}</p>
+      <span class="cnt" style="margin-top:6px">${P(u.p).name}${u.atts.length ? ` · ${ICON('solar:paperclip-bold')}${u.atts.length}` : ''}</span></span></span></button>`;
+  return { tab: 3, html: `<div class="body with-tabs">
+    ${tabHead('التقويم', 'التحديثات اليومية لمشاريعك', `<button class="chip-btn pearl" type="button" data-act="calToday" style="color:#000">${ICON('solar:calendar-mark-bold')}اليوم</button>`)}
+    <div class="cal-head"><h3 class="h-md">${MONTHS[m - 1]} <span class="latin">${y}</span></h3>
+      <div class="cal-nav"><button class="icon-btn sm" type="button" data-act="calPrev" aria-label="الشهر السابق"${atMin ? ' disabled' : ''}>${ICON('solar:alt-arrow-right-linear')}</button>
+        <button class="icon-btn sm" type="button" data-act="calNext" aria-label="الشهر التالي"${atMax ? ' disabled' : ''}>${ICON('solar:alt-arrow-left-linear')}</button></div></div>
+    <div class="wk" aria-hidden="true"><span>أحد</span><span>إثنين</span><span>ثلاثاء</span><span>أربعاء</span><span>خميس</span><span>جمعة</span><span>سبت</span></div>
+    <div class="cal">${cells}</div>
+    <div class="cal-legend"><span>أقل</span><i></i><i style="background:rgba(243,127,70,.2)"></i><i style="background:rgba(243,127,70,.4)"></i><i style="background:var(--primary)"></i><span>أكثر</span></div>
+    <div class="sec-head" style="margin-top:26px"><div><h3 class="h-md">${selIso === TODAY ? 'اليوم · ' : ''}${fmtDay(selIso)}</h3><div class="sec-sub">${nUpdates(dayUps.length)}</div></div></div>
+    <div class="stack">${dayUps.length ? dayUps.map(item).join('') : emptyBox('solar:calendar-bold', 'لا توجد تحديثات في هذا اليوم', 'اختر يومًا ملوّنًا لعرض تحديثاته.')}</div>
+  </div>` };
+};
+
+const NT = { update: ['solar:document-add-bold', 'var(--primary)'], suspended: ['solar:pause-circle-bold', 'var(--warning)'], resumed: ['solar:play-circle-bold', 'var(--success)'],
+  approaching: ['solar:hourglass-bold', 'var(--warning)'], ended: ['solar:flag-bold', 'var(--muted)'] };
+SCREENS.notifications = () => {
+  const grp = n => { const d = Math.round((parse(TODAY) - parse(iso(n.at))) / 864e5); return d === 0 ? 'اليوم' : d === 1 ? 'أمس' : 'سابقًا'; };
+  const notes = [...S.notes].sort((a, b) => b.at - a.at);
+  let h = '', g = '';
+  notes.forEach((n, i) => {
+    if (grp(n) !== g) { g = grp(n); h += `<div class="ngroup${i ? '' : ' first'}">${g}</div>`; }
+    // Deep link only while the user still has access to that project.
+    const ok = n.p && visibleCodes().includes(n.p);
+    const [icon, tint] = NT[n.type];
+    const foot = ok ? `<span class="ntime">${rel(n.at)}</span>${ICON('solar:alt-arrow-left-linear')}`
+      : `<span class="ntime">${rel(n.at)}</span><span class="nolink">${ICON('solar:lock-keyhole-minimalistic-bold')}لم يعد لديك صلاحية الوصول</span>`;
+    h += `<button type="button" class="nrow${n.unread ? ' unread' : ''}" data-act="openNote" data-n="${n.id}">
+      <span class="halo">${ICON(icon, tint)}</span>
+      <span class="nbody"><strong>${n.title}</strong><span class="nt">${esc(n.body)}</span><span class="nfoot">${foot}</span></span>
+      ${n.unread ? '<span class="ndot" aria-label="غير مقروء"></span>' : ''}</button>`;
+  });
+  const u = unread();
+  return { html: `<div class="body">
+    ${topbar('الإشعارات', u ? `${u} غير مقروءة` : 'لا توجد إشعارات غير مقروءة')}
+    ${u ? `<div style="display:flex;justify-content:flex-end;margin:-6px 0 4px"><button class="text-btn" type="button" data-act="markAll" style="font-size:12px">تحديد الكل كمقروء</button></div>` : ''}
+    ${notes.length ? h : emptyBox('solar:bell-bold', 'لا توجد إشعارات', 'ستصلك هنا إشعارات التحديثات اليومية وتغيّر حالة المشاريع واقتراب تواريخ النهاية.')}
+  </div>` };
+};
+
+SCREENS.profile = () => ({ tab: 4, html: `<div class="body with-tabs">
+  <div class="prof"><div class="avatar xl" aria-hidden="true">${USERS.me.i}</div><h2>${USERS.me.name}</h2><div class="sub">${USERS.me.role}</div>
+    <div class="chips"><span class="tag2">مدير مشروع</span><span class="tag2">الصلاحية: عرض فقط</span></div></div>
+  <div class="group-label">معلومات الحساب</div>
+  <div class="gcard">
+    <button class="grow-row" type="button" data-go="email"><span class="halo">${ICON('solar:letter-bold', 'var(--blue)')}</span>
+      <span class="kv"><span>البريد الإلكتروني</span><strong>${esc(S.email)}</strong></span><span class="act">تغيير${ICON('solar:alt-arrow-left-linear')}</span></button>
+    <div class="grow-row"><span class="halo">${ICON('solar:phone-bold', 'var(--success)')}</span><span class="kv"><span>رقم الجوال</span><strong class="latin" dir="ltr">+966 50 771 4402</strong></span></div>
+    <div class="grow-row"><span class="halo">${ICON('solar:user-id-bold', 'var(--indigo)')}</span><span class="kv"><span>المسمى الوظيفي</span><strong>${USERS.me.role}</strong></span></div>
+    <div class="grow-row"><span class="halo">${ICON('solar:folder-with-files-bold', 'var(--primary)')}</span><span class="kv"><span>المشاريع المسندة</span><strong>${countAr(myProjects().length, 'لا توجد مشاريع', 'مشروع واحد', 'مشروعان', 'مشاريع', 'مشروعًا')}</strong></span></div>
+  </div>
+  <div class="group-label">الأمان</div>
+  <div class="gcard">
+    <button class="grow-row" type="button" data-go="password"><span class="halo">${ICON('solar:lock-password-bold', 'var(--warning)')}</span><span class="kv"><strong>تغيير كلمة المرور</strong></span>${ICON('solar:alt-arrow-left-linear')}</button>
+    <button class="grow-row" type="button" data-act="logout"><span class="halo">${ICON('solar:logout-2-bold', 'var(--error)')}</span><span class="kv"><strong class="danger">تسجيل الخروج</strong></span></button>
+  </div>
+  <p class="foot-note">حساب مدير المشروع للعرض فقط · لتعديل الاسم أو الجوال تواصل مع مسؤول النظام · <span class="latin">v1.0</span></p>
+</div>` });
+
+const pwField = (id, label, icon, ac) => `<div class="field"><label for="${id}">${label}</label>
+  <div class="input" id="${id}Box">${ICON(icon)}<input id="${id}" type="password" dir="ltr" placeholder="••••••••" autocomplete="${ac}"><button type="button" class="eye" data-act="eye" aria-label="إظهار كلمة المرور">${ICON('solar:eye-bold')}</button></div></div>`;
+SCREENS.password = () => ({ html: `<form class="body" data-submit="password" novalidate>
+  ${topbar('تغيير كلمة المرور')}
+  <p class="lede">أدخل كلمة المرور الحالية ثم كلمة المرور الجديدة مرتين للتأكيد.</p>
+  ${pwField('pw0', 'كلمة المرور الحالية', 'solar:lock-password-bold', 'current-password')}
+  ${pwField('pw1', 'كلمة المرور الجديدة', 'solar:key-minimalistic-bold', 'new-password')}
+  ${pwField('pw2', 'تأكيد كلمة المرور الجديدة', 'solar:key-minimalistic-bold', 'new-password')}
+  <div class="msg" id="pwMsg" role="alert" hidden></div>
+  <button class="btn-primary" type="submit"><span>حفظ كلمة المرور</span></button>
+</form>` });
+
+SCREENS.email = () => ({ html: `<form class="body" data-submit="email" novalidate>
+  ${topbar('تغيير البريد الإلكتروني')}
+  <p class="lede">سيُستخدم البريد الجديد لتسجيل الدخول بدلًا من البريد الحالي.</p>
+  <div class="field"><span class="label">البريد الحالي</span>
+    <div class="input locked">${ICON('solar:letter-bold')}<span class="val latin" style="text-align:right;direction:ltr">${esc(S.email)}</span></div></div>
+  <div class="field"><label for="em1">البريد الجديد</label>
+    <div class="input" id="em1Box">${ICON('solar:letter-bold')}<input id="em1" type="email" inputmode="email" dir="ltr" placeholder="name@company.sa" autocomplete="email"></div></div>
+  <div class="msg" id="emMsg" role="alert" hidden></div>
+  <button class="btn-primary" type="submit"><span>حفظ البريد الإلكتروني</span></button>
+</form>` });
+
+/* ═════════════════════ Actions ═════════════════════ */
+function setMsg(el, kind, icon, text) {
+  if (!kind) { el.hidden = true; return; }
+  el.className = 'msg msg-' + kind;
+  el.innerHTML = `${ICON(icon)}<span>${text}</span>`;
+  el.hidden = false;
+}
+const ERR = 'solar:danger-circle-bold';
+function previewHTML(a) {
+  const t = FT[a.t];
+  let body, cap = '';
+  if (a.t === 'img') body = a.url ? `<img src="${a.url}" alt="${esc(a.name)}">` : `<span class="thumb pv-art t${tone(a.id)}" data-seed="${+a.id.slice(1)}"></span>`, cap = a.url ? '' : 'صورة تجريبية';
+  else if (a.t === 'video') body = a.poster ? `<span class="thumb pv-art has-img" style="background-image:url('${a.poster}')"><span class="play">${ICON('solar:play-bold')}</span></span>`
+    : `<span class="thumb pv-art t${tone(a.id)}" data-seed="${+a.id.slice(1)}"><span class="play">${ICON('solar:play-bold')}</span></span>`, cap = 'فيديو تجريبي — لا يوجد ملف فعلي للتشغيل';
+  else body = `<div class="pdf-page" aria-hidden="true"><i class="h"></i>${'<i></i>'.repeat(4)}<i style="width:70%"></i><br>${'<i></i>'.repeat(5)}<i style="width:45%"></i></div>`, cap = 'مستند تجريبي';
+  return `<div class="pv" role="dialog" aria-label="معاينة ${esc(a.name)}">
+    <div class="pv-top"><button class="icon-btn" type="button" data-act="closeOverlay" aria-label="إغلاق">${ICON('solar:close-circle-linear')}</button>
+      <div class="pv-name"><strong>${esc(a.name)}</strong><span><span class="latin" dir="ltr">${a.size}</span> · ${t.label}</span></div>
+      <button class="icon-btn" type="button" data-act="download" data-a="${a.id}" aria-label="تنزيل">${ICON('solar:download-minimalistic-bold')}</button></div>
+    <div class="pv-body">${body}</div>${cap ? `<div class="pv-cap">${cap}</div>` : ''}</div>`;
+}
+const ACTIONS = {
+  back,
+  closeOverlay,
+  fillDemo() { fillDemoLogin(); },
+  eye(el) {
+    const input = el.parentElement.querySelector('input'), show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    el.setAttribute('aria-label', show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
+    el.firstElementChild.setAttribute('icon', show ? 'solar:eye-closed-bold' : 'solar:eye-bold');
+  },
+  homeFilter(el) { S.homeFilter = el.dataset.f; render('stay'); },
+  updFilter(el) { cur().params.who = el.dataset.f; cur().params.limit = 0; render('stay'); },
+  fileFilter(el) { cur().params.f = el.dataset.f; cur().params.limit = 0; render('stay'); },
+  actFilter(el) { cur().params.f = el.dataset.f; cur().params.limit = 0; render('stay'); },
+  more() { const p = cur().params; p.limit = (p.limit || { files: 12, activity: 20 }[cur().name] || 6) * 2; render('stay'); },
+  preview(el) {
+    $('#overlay').innerHTML = previewHTML(S.atts[el.dataset.a]);
+    $('#statusbar').classList.add('light');
+    decorate($('#overlay'));
+  },
+  download(el) {
+    const a = S.atts[el.dataset.a];
+    if (a.url) { const l = document.createElement('a'); l.href = a.url; l.download = a.name; l.click(); toast(`تم تنزيل ${a.name}`, 'solar:download-minimalistic-bold'); }
+    else toast(`تنزيل ${a.name} (ملف تجريبي)`, 'solar:download-minimalistic-bold');
+  },
+  mapPin(el) { S.mapSel = el.dataset.p; render('stay'); },
+  mapFilter(el) {
+    const s = el.dataset.s;
+    S.mapHide = S.mapHide.includes(s) ? S.mapHide.filter(x => x !== s) : [...S.mapHide, s];
+    render('stay');
+  },
+  mapAll() { S.mapHide = []; render('stay'); },
+  calDay(el) { S.cal.d = +el.dataset.d; render('stay'); },
+  calPrev() { let { y, m } = S.cal; m--; if (m < 1) { m = 12; y--; } S.cal = { y, m, d: 1 }; render('stay'); },
+  calNext() {
+    let { y, m } = S.cal; m++; if (m > 12) { m = 1; y++; }
+    S.cal = { y, m, d: (y === 2026 && m === 11) ? 2 : 1 }; render('stay');
+  },
+  calToday() { S.cal = { y: 2026, m: 11, d: 2 }; render('stay'); },
+  repPeriod(el) { S.rep.period = el.dataset.f; render('stay'); },
+  repProject(el) { S.rep.p = el.dataset.f; render('stay'); },
+  openReport(el) { S.rep.p = el.dataset.p; tab('reports'); },
+  openNote(el) {
+    const n = S.notes.find(x => x.id === el.dataset.n);
+    n.unread = false;
+    if (!(n.p && visibleCodes().includes(n.p))) { render('stay'); return toast('لم يعد لديك صلاحية الوصول إلى هذا المشروع', 'solar:lock-keyhole-minimalistic-bold'); }
+    const u = n.u && U(n.u);
+    if (u && shown(u)) go('update', { u: u.id }); else go('project', { p: n.p });
+  },
+  markAll() { S.notes.forEach(n => n.unread = false); render('stay'); toast('تم تحديد كل الإشعارات كمقروءة'); },
+  // BRD: only the PM app asks for logout confirmation.
+  logout() {
+    openSheet(`<h3 class="h-md">تسجيل الخروج؟</h3><div class="sec-sub">ستحتاج إلى إدخال بريدك وكلمة المرور لتسجيل الدخول مجددًا.</div>
+      <div class="btn-row" style="margin-top:20px"><button class="btn-sec" type="button" data-act="closeOverlay">إلغاء</button><button class="btn-danger" type="button" data-act="logoutConfirm">تسجيل الخروج</button></div>`);
+  },
+  logoutConfirm() { S.authed = false; S.stack = [{ name: 'login', params: {} }]; render('fade'); toast('تم تسجيل الخروج', 'solar:logout-2-bold'); },
+};
+
+const SUBMITS = {
+  login() {
+    const email = $('#lgEmail').value.trim().toLowerCase(), pass = $('#lgPass').value, msg = $('#lgMsg');
+    $('#lgPassBox').classList.remove('bad');
+    if (!email || !pass) return setMsg(msg, 'error', ERR, 'يرجى إدخال البريد الإلكتروني وكلمة المرور.');
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg(msg, 'error', ERR, 'صيغة البريد الإلكتروني غير صحيحة.');
+    // BRD: deactivated users cannot log in; their data is kept.
+    if (DEACTIVATED.includes(email)) return setMsg(msg, 'warn', 'solar:forbidden-circle-bold', 'هذا الحساب معطّل حاليًا. تواصل مع مسؤول النظام لإعادة تفعيله.');
+    if (email !== S.email || pass !== S.password) { $('#lgPassBox').classList.add('bad'); return setMsg(msg, 'error', ERR, 'البريد الإلكتروني أو كلمة المرور غير صحيحة.'); }
+    setMsg(msg);
+    const btn = $('#lgBtn'); btn.classList.add('loading'); btn.disabled = true;
+    setTimeout(() => { S.authed = true; tab('home'); toast(`مرحبًا بك، ${USERS.me.first}`); }, 700);
+  },
+  password() {
+    const [a, b, c] = ['pw0', 'pw1', 'pw2'].map(id => $('#' + id).value), msg = $('#pwMsg');
+    ['pw0Box', 'pw1Box', 'pw2Box'].forEach(id => $('#' + id).classList.remove('bad'));
+    if (!a || !b || !c) return setMsg(msg, 'error', ERR, 'يرجى تعبئة جميع الحقول.');
+    if (a !== S.password) { $('#pw0Box').classList.add('bad'); return setMsg(msg, 'error', ERR, 'كلمة المرور الحالية غير صحيحة.'); }
+    if (b !== c) { $('#pw2Box').classList.add('bad'); return setMsg(msg, 'error', ERR, 'كلمة المرور الجديدة وتأكيدها غير متطابقين.'); }
+    S.password = b;
+    back(); toast('تم تغيير كلمة المرور');
+  },
+  email() {
+    const v = $('#em1').value.trim().toLowerCase(), msg = $('#emMsg'), box = $('#em1Box');
+    box.classList.remove('bad');
+    if (!v) return setMsg(msg, 'error', ERR, 'يرجى إدخال البريد الإلكتروني الجديد.');
+    if (!/^\S+@\S+\.\S+$/.test(v)) { box.classList.add('bad'); return setMsg(msg, 'error', ERR, 'صيغة البريد الإلكتروني غير صحيحة.'); }
+    if (v === S.email) { box.classList.add('bad'); return setMsg(msg, 'error', ERR, 'هذا هو بريدك الحالي.'); }
+    // BRD: email change only requires uniqueness (no OTP).
+    const taken = [...Object.values(USERS).map(u => u.email), ...DEACTIVATED].filter(e => e !== S.email);
+    if (taken.includes(v)) { box.classList.add('bad'); return setMsg(msg, 'error', ERR, 'هذا البريد مستخدم في حساب آخر. اختر بريدًا مختلفًا.'); }
+    S.email = v;
+    back(); toast('تم تحديث البريد الإلكتروني');
+  },
+};
+
+/* ═════════════════════ Wiring ═════════════════════ */
+phone.addEventListener('click', e => {
+  const t = e.target.closest('[data-act],[data-go],[data-tab]');
+  if (!t || !phone.contains(t) || t.disabled) return;
+  if (t.dataset.act) { e.preventDefault(); return ACTIONS[t.dataset.act](t, e); }
+  if (t.dataset.tab) return tab(t.dataset.tab);
+  if (t.dataset.go) { const { go: name, ...params } = t.dataset; go(name, params); }
+});
+phone.addEventListener('submit', e => { e.preventDefault(); SUBMITS[e.target.dataset.submit](e.target); });
+phone.addEventListener('input', e => {
+  if (['lgEmail', 'lgPass'].includes(e.target.id)) { $('#lgMsg').hidden = true; $('#lgPassBox').classList.remove('bad'); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#overlay').innerHTML) closeOverlay(); });
+
+/* Side panel */
+const FLOW = [['login', '01', 'تسجيل الدخول'], ['home', '02', 'الرئيسية'], ['project', '03', 'تفاصيل المشروع'], ['updates', '04', 'التحديثات اليومية'], ['update', '05', 'تفاصيل التحديث'],
+  ['files', '06', 'مكتبة الملفات'], ['activity', '07', 'سجل النشاط'], ['map', '08', 'الخريطة'], ['reports', '09', 'التقارير'], ['calendar', '10', 'التقويم'],
+  ['notifications', '11', 'الإشعارات'], ['profile', '12', 'حسابي'], ['password', '13', 'تغيير كلمة المرور'], ['email', '14', 'تغيير البريد الإلكتروني']];
+$('#flow').innerHTML = FLOW.map(([k, n, l]) => `<button type="button" data-jump="${k}"><span class="n">${n}</span>${l}</button>`).join('');
+function syncSide() {
+  const name = cur().name;
+  document.querySelectorAll('[data-jump]').forEach(b => b.setAttribute('aria-current', b.dataset.jump === name));
+  $('#noProjects').checked = S.noProjects;
+  document.querySelectorAll('[data-env]').forEach(b => b.setAttribute('aria-pressed', b.dataset.env === ENV));
+}
+function jump(name) {
+  if (name === 'login') { S.authed = false; S.stack = [{ name: 'login', params: {} }]; return render('fade'); }
+  if (['project', 'updates', 'update', 'files', 'activity'].includes(name)) S.noProjects = false;
+  S.authed = true;
+  const p = { p: 'PRJ-0142' }, u = { u: updatesOf('PRJ-0142')[0].id };
+  const paths = {
+    home: [['home']], project: [['home'], ['project', p]], updates: [['home'], ['project', p], ['updates', p]], update: [['home'], ['project', p], ['updates', p], ['update', u]],
+    files: [['home'], ['project', p], ['files', p]], activity: [['home'], ['project', p], ['activity', p]], map: [['map']], reports: [['reports']], calendar: [['calendar']],
+    notifications: [['home'], ['notifications']], profile: [['profile']], password: [['profile'], ['password']], email: [['profile'], ['email']],
+  };
+  S.stack = paths[name].map(([n, params]) => ({ name: n, params: { ...(params || {}) } }));
+  render('fade');
+}
+$('#flowToggle').addEventListener('click', e => {
+  const open = e.currentTarget.getAttribute('aria-expanded') !== 'true';
+  e.currentTarget.setAttribute('aria-expanded', open);
+  $('#flowBody').classList.toggle('open', open);
+  $('#flowBody').inert = !open;
+});
+$('#flow').addEventListener('click', e => { const b = e.target.closest('[data-jump]'); if (b) jump(b.dataset.jump); });
+function fillDemoLogin() {
+  if (!isDev() || !$('#lgEmail')) return;
+  $('#lgEmail').value = S.email; $('#lgPass').value = S.password;
+  $('#lgMsg').hidden = true; $('#lgPassBox').classList.remove('bad'); $('#lgEmail').focus();
+}
+$('#envSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-env]');
+  if (!b || b.dataset.env === ENV) return;
+  ENV = b.dataset.env;
+  if (cur().name === 'login') render('stay'); else syncSide();
+});
+$('#noProjects').addEventListener('change', e => {
+  S.noProjects = e.target.checked; S.homeFilter = 'ALL';
+  if (!S.authed) return;
+  if (S.noProjects) S.stack = [S.stack[0].name === 'login' ? S.stack[0] : { name: TABS.some(t => t[0] === S.stack[0].name) ? S.stack[0].name : 'home', params: {} }];
+  render('fade');
+});
+$('#resetDemo').addEventListener('click', start);
+
+/* Boot */
+document.querySelector('#statusbar').innerHTML = `<span>9:41</span><span class="sb-icons">
+  <svg width="18" height="12" viewBox="0 0 18 12"><rect y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" width="3" height="12" rx="1"/></svg>
+  <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3A10.3 10.3 0 0 0 8 .4C5.2.4 2.7 1.5.8 3.3L2 4.6a8.6 8.6 0 0 1 6-2.4Zm0 3.6c1.3 0 2.5.5 3.4 1.3l1.2-1.3A6.7 6.7 0 0 0 8 4c-1.8 0-3.4.7-4.6 1.8l1.2 1.3c.9-.8 2.1-1.3 3.4-1.3Zm0 3.5c-.5 0-1 .2-1.3.5L8 11.6l1.3-1.8c-.3-.3-.8-.5-1.3-.5Z"/></svg>
+  <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".5"/></svg></span>`;
+function start() {
+  S = initialState();
+  buildData();
+  render('fade');
+}
+decorate(document.querySelector('.stage-bg'));
+start();
+</script>
+</body>
+</html>
