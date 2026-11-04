@@ -3,10 +3,13 @@
    full-bleed 3D miniature illustrations generated with Magnific (assets/concepts/dusk-*.jpg).
    Same visual identity in both apps; each app passes its own role wording. */
 (() => {
+  // Each illustration is framed so its subject rests on the same line (446px down the 390×560 art area),
+  // centred, at a comparable visual weight: size = rendered image height, pos = background offset,
+  // bg = the image's own backdrop colour, which fills any edge the image leaves uncovered.
   const ART = {
-    projects: 'assets/concepts/dusk-1.jpg',
-    updates: 'assets/concepts/dusk-2.jpg',
-    tracking: 'assets/concepts/dusk-3.jpg',
+    projects: { src: 'assets/concepts/dusk-1.jpg', size: 560, pos: '-31px 15px', bg: '#18171C' },
+    updates:  { src: 'assets/concepts/dusk-2.jpg', size: 543, pos: '-25px 39px', bg: '#1A1B20' },
+    tracking: { src: 'assets/concepts/dusk-3.jpg', size: 577, pos: '-36px 4px', bg: '#16171C' },
   };
   const ICON = (i, c = '') => `<iconify-icon icon="${i}"${c ? ` style="color:${c}"` : ''}></iconify-icon>`;
   const mark = (size, fill = '#fff', ring = '#F37F46', dot = '#17161B') =>
@@ -66,12 +69,15 @@
 
     /* Onboarding */
     .ob{position:absolute;inset:0;background:var(--dusk);color:#fff;overflow:hidden;touch-action:pan-y}
-    .ob-art{position:absolute;left:0;right:0;top:0;height:560px;background:center 20%/cover no-repeat;animation:obArt .6s cubic-bezier(.2,.8,.2,1) both}
+    .ob-art{position:absolute;left:0;right:0;top:0;height:560px;background-repeat:no-repeat;animation:obArt .6s cubic-bezier(.2,.8,.2,1) both}
     .ob-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,22,27,.55) 0%,rgba(23,22,27,0) 18%,rgba(23,22,27,0) 58%,var(--dusk) 100%)}
     .ob-top{position:absolute;top:58px;left:var(--gutter);right:var(--gutter);z-index:2;display:flex;justify-content:space-between;align-items:center;height:40px}
     .ob-brand{display:flex;align-items:center;gap:8px;font-family:"Nunito Sans",sans-serif;font-size:14px;font-weight:900;direction:ltr}
     .ob-skip{height:34px;padding:0 14px;border-radius:var(--r-full);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);font-size:12px;font-weight:800;color:#fff}
-    .ob-body{position:absolute;left:0;right:0;bottom:0;padding:0 var(--gutter) 36px}
+    /* Same rhythm on every step: the title always starts at 536px and the dots, buttons and hint slot
+       always sit at the bottom, whatever the title's line count or whether the hint is shown. */
+    .ob-body{position:absolute;left:0;right:0;top:536px;bottom:0;display:flex;flex-direction:column;padding:0 var(--gutter) 36px}
+    .ob-foot{margin-top:auto}
     .ob-text{animation:splashRise .45s ease .08s both}
     .ob-title{margin:0 0 8px;font-size:26px;font-weight:900;line-height:36px}
     .ob-copy{margin:0;font-size:14px;font-weight:600;line-height:23px;color:rgba(255,255,255,.66)}
@@ -82,7 +88,7 @@
     .ob-back{width:56px;height:56px;flex:none;border-radius:var(--r-full);display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff}
     .ob-back iconify-icon{font-size:22px}
     .ob-btns .btn-primary{flex:1;margin:0;box-shadow:0 14px 34px -10px rgba(243,127,70,.8)}
-    .ob-hint{margin:10px 0 0;text-align:center;font-size:12px;font-weight:600;color:rgba(255,255,255,.5)}
+    .ob-hint{margin:10px 0 0;min-height:23px;line-height:23px;text-align:center;font-size:12px;font-weight:600;color:rgba(255,255,255,.5)}
     @keyframes obArt{from{transform:scale(1.04);opacity:0}}
     @media (prefers-reduced-motion:reduce){.splash *,.ob-art,.ob-text{animation:none!important}}
   </style>`);
@@ -113,18 +119,18 @@
     },
 
     onboarding: ({ steps, i, tag, tagIcon }) => {
-      const s = steps[i], last = i === steps.length - 1;
+      const s = steps[i], last = i === steps.length - 1, a = ART[s.art];
       return `<div class="ob" data-swipe="onboarding">
-        <div class="ob-art" role="img" aria-label="${s.alt}" style="background-image:url('${ART[s.art]}')"></div>
+        <div class="ob-art" role="img" aria-label="${s.alt}" style="background-image:url('${a.src}');background-size:auto ${a.size}px;background-position:${a.pos};background-color:${a.bg}"></div>
         <div class="ob-top"><span class="ob-brand">${mark(26)}Digital Operation</span>
           ${last ? '' : `<button class="ob-skip" type="button" data-act="obSkip">تخطي</button>`}</div>
         <div class="ob-body">
           <div class="ob-text"><h2 class="ob-title">${s.title}</h2><p class="ob-copy">${s.text}</p></div>
-          <div class="ob-dots" role="group" aria-label="الخطوة ${i + 1} من ${steps.length}">${steps.map((_, k) =>
+          <div class="ob-foot"><div class="ob-dots" role="group" aria-label="الخطوة ${i + 1} من ${steps.length}">${steps.map((_, k) =>
             `<button type="button" data-act="obGo" data-i="${k}" aria-label="الخطوة ${k + 1}"${k === i ? ' aria-current="step"' : ''}></button>`).join('')}</div>
           <div class="ob-btns">${i ? `<button class="ob-back" type="button" data-act="obPrev" aria-label="السابق">${ICON('solar:arrow-right-linear')}</button>` : ''}
             <button class="btn-primary" type="button" data-act="obNext">${last ? `<span>ابدأ الآن</span>${ICON('solar:login-2-bold')}` : `<span>التالي</span>${ICON('solar:alt-arrow-left-bold')}`}</button></div>
-          ${last ? '<p class="ob-hint">ستنتقل الآن إلى تسجيل الدخول</p>' : ''}
+          ${last ? '<p class="ob-hint">ستنتقل الآن إلى تسجيل الدخول</p>' : '<p class="ob-hint" aria-hidden="true"></p>'}</div>
         </div>
       </div>`;
     },
