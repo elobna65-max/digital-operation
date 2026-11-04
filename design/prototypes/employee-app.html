@@ -167,6 +167,9 @@
   .seg.fill button{flex:1}
   .seg button[aria-pressed="true"]{background:#fff;color:#000;font-weight:800;box-shadow:0 1px 2px rgba(0,0,0,.06)}
   .seg .c{font-family:"Nunito Sans";font-size:11px;font-weight:900;opacity:.55}
+  /* File-type filter: runs to 16px from the screen edges; options share the width, scroll sideways when they do not fit */
+  .seg.bleed{margin-inline:calc(16px - var(--gutter))}
+  .seg.bleed button{flex:1 0 auto}
   /* Home status filter: separate chips in a sideways scroller that runs to the screen edges, so the next chip peeks in. */
   .chips{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:var(--gutter);scrollbar-width:none;
     margin:0 calc(var(--gutter) * -1) 10px;padding:4px var(--gutter) 8px;cursor:grab;
@@ -416,7 +419,10 @@
   .glass{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(229,229,234,.5);border-radius:var(--r-full);box-shadow:0 8px 30px rgba(0,0,0,.08)}
   .map-title{display:flex;justify-content:space-between;align-items:center;padding:6px;padding-inline-start:18px}
   .map-title strong{font-size:16px;font-weight:800}
-  .map-legend{display:flex;gap:4px;padding:5px;align-self:flex-start;flex-wrap:wrap}
+  /* Status filter: one row, full width like the title bar above; badges share the width and scroll sideways if they ever overflow */
+  .map-legend{display:flex;gap:3px;padding:4px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+  .map-legend::-webkit-scrollbar{display:none}
+  .map-legend .pip{flex:1 0 auto;justify-content:center}
   .sheet{position:absolute;inset-inline:12px;bottom:110px;z-index:6;background:#fff;border-radius:var(--r-3xl);padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.12)}
   .grab{width:36px;height:5px;border-radius:9px;background:#E5E5EA;margin:-6px auto 12px}
 
@@ -1157,7 +1163,7 @@ SCREENS.files = params => {
   const opts = [['all', 'الكل', all.length], ['img', 'صور', c('img')], ['video', 'فيديو', c('video')], ['pdf', 'PDF', c('pdf')], ['eng', 'هندسية', c('eng')]];
   return { html: `<div class="body">
     ${topbar('مكتبة الملفات', projK(p))}
-    <div class="seg" role="group" aria-label="تصفية حسب النوع">${opts.map(([key, l, n]) => `<button type="button" data-act="fileFilter" data-f="${key}" aria-pressed="${key === k}">${l}<span class="c">${n}</span></button>`).join('')}</div>
+    <div class="seg bleed" role="group" aria-label="تصفية حسب النوع">${opts.map(([key, l, n]) => `<button type="button" data-act="fileFilter" data-f="${key}" aria-pressed="${key === k}">${l}<span class="c">${n}</span></button>`).join('')}</div>
     <div class="flist">${list.length ? list.slice(0, limit).map(fileRow).join('') : emptyBox('solar:folder-open-bold', 'لا توجد ملفات من هذا النوع', 'جرّب نوعًا آخر أو عرض الكل.')}</div>
     ${list.length > limit ? `<button class="more-btn" type="button" data-act="more">${ICON('solar:alt-arrow-down-linear')}عرض المزيد (${list.length - limit})</button>` : ''}
     <div class="msg msg-info" style="margin-top:16px">${ICON('solar:info-circle-bold')}<span>تُعرض الصور والفيديو وPDF داخل التطبيق، أما الملفات الهندسية فللتنزيل فقط. لإضافة ملف أرفقه ضمن تحديث يومي.</span></div>
