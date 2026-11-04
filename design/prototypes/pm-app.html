@@ -260,6 +260,8 @@
   .login .input{background:#fff;box-shadow:0 6px 18px -12px rgba(90,50,20,.28)}
   .login .input:focus-within{box-shadow:0 0 0 2px var(--primary),0 6px 18px -12px rgba(90,50,20,.28)}
   .login .input.bad{box-shadow:0 0 0 2px rgba(255,59,48,.55)}
+  /* Demo login: the browser must not prefill saved credentials; if it autofills anyway, keep the white field instead of its blue tint */
+  .login .input input:-webkit-autofill,.login .input input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 40px #fff inset;-webkit-text-fill-color:#000;caret-color:#000}
   /* Photo runs edge to edge (the phone frame clips the top corners); height grows with the width (374:330) and the brand keeps its place */
   .login .art{margin:0;height:344px;border-radius:0}
   .login .art-top{top:70px}
@@ -965,15 +967,15 @@ SCREENS.login = () => ({
     </div>
     <div class="art-foot"><span class="coord">N 24.6312° · E 46.7133°</span></div>
   </div>
-  <form class="login-form" data-submit="login" novalidate>
+  <form class="login-form" data-submit="login" novalidate autocomplete="off">
     ${isDev() ? `<div class="login-actions"><button class="dev-fill" type="button" data-act="fillDemo" aria-label="تعبئة بيانات الدخول التجريبية">تعبئة بيانات تجريبية<span class="env">${ENVS[ENV]}</span></button></div>` : ''}
     <div class="kicker">تسجيل الدخول</div>
     <h2 class="h-lg">مرحبًا بعودتك</h2>
     <p class="lede">سجّل الدخول لمتابعة مشاريعك والاطلاع على التحديثات اليومية والتقارير.</p>
     <div class="field"><label for="lgEmail">البريد الإلكتروني</label>
-      <div class="input">${ICON('solar:letter-bold')}<input id="lgEmail" type="email" inputmode="email" dir="ltr" placeholder="name@company.sa" autocomplete="username"></div></div>
+      <div class="input">${ICON('solar:letter-bold')}<input id="lgEmail" type="email" inputmode="email" dir="ltr" placeholder="name@company.sa" autocomplete="off"></div></div>
     <div class="field"><label for="lgPass">كلمة المرور</label>
-      <div class="input" id="lgPassBox">${ICON('solar:lock-password-bold')}<input id="lgPass" type="password" dir="ltr" placeholder="••••••••" autocomplete="current-password"><button type="button" class="eye" data-act="eye" aria-label="إظهار كلمة المرور">${ICON('solar:eye-bold')}</button></div></div>
+      <div class="input" id="lgPassBox">${ICON('solar:lock-password-bold')}<input id="lgPass" type="password" dir="ltr" placeholder="••••••••" autocomplete="new-password"><button type="button" class="eye" data-act="eye" aria-label="إظهار كلمة المرور">${ICON('solar:eye-bold')}</button></div></div>
     <div class="msg" id="lgMsg" role="alert" hidden></div>
     <button class="btn-primary" id="lgBtn" type="submit"><span>تسجيل الدخول</span>${ICON('solar:alt-arrow-left-bold')}<span class="spin" aria-hidden="true"></span></button>
     <p class="help">${ICON('solar:info-circle-bold')}<span>الحسابات يُنشئها مسؤول النظام. لإعادة تعيين كلمة المرور تواصل مع المسؤول.</span></p>
